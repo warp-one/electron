@@ -1,5 +1,5 @@
 import pyglet
-from pyglet.window import mouse
+from pyglet.window import mouse, key
 
 import tools
 from resources import mote, thirty
@@ -11,12 +11,14 @@ class UnitController(object):
         self.all_units = []
         self.init_xy = (0, 0)
         self.final_xy = (0, 0)
+
+        self.to_select = []
+        
+        self.keys = key.KeyStateHandler()
         
         self.background = pyglet.graphics.OrderedGroup(0)
         self.midground = pyglet.graphics.OrderedGroup(1)
         self.foreground = pyglet.graphics.OrderedGroup(2)
-
-        pyglet.clock.schedule_interval(self.update, 1/60.)
         
     def on_mouse_press(self, x, y, buttons, modifiers):
         if buttons & mouse.LEFT:
@@ -31,8 +33,10 @@ class UnitController(object):
     def on_mouse_release(self, x, y, buttons, modifiers):
         if buttons & mouse.LEFT:
             self.final_xy = (x, y)
-            self.select_in_area()
-
+            if self.final_xy == self.init_xy:
+                self.select_from_point()
+            else:
+                self.select_in_area()
         
     def load_units(self, unit_list):
         for u in unit_list:
@@ -44,6 +48,24 @@ class UnitController(object):
             self.all_units.remove(u)
             # u.spawn_death_animation()
             u.delete()
+            
+    def run_selection(self):
+        for u in self.all_units:
+            u.deselect()
+            u.deselect()
+            u.deselect()
+        while self.to_select:
+            self.to_select.pop().select()
+            
+    def select_from_point(self):
+        for u in self.all_units:
+            if tools.get_distance(self.init_xy, (u.x, u.y)) <= u.RADIUS:
+                if not u.is_selected():
+                    self.to_select.append(u)
+            else:
+                if self.keys[key.LSHIFT] or self.keys[key.RSHIFT]:
+                    self.to_select.append(u)
+        self.run_selection()
             
     def select_in_area(self):
         x1, y1 = self.init_xy
@@ -61,19 +83,17 @@ class UnitController(object):
             rect_top = y2
             rect_bot = y1
         for u in self.all_units:
-            if u.x >= rect_left and u.x <= rect_right:
-                if u.y >= rect_bot and u.y <= rect_top:
-                    u.select()
-                else:
-                    if u.is_selected:
-                        u.deselect()
+            if u.x >= rect_left and u.x <= rect_right and u.y >= rect_bot and u.y <= rect_top:
+                self.to_select.append(u)
             else:
-                if u.is_selected:
-                    u.deselect()
+                if self.keys[key.LSHIFT] or self.keys[key.RSHIFT]:
+                    self.to_select.append(u)
+        self.run_selection()
             
     def give_move_command(self, unit_list, destination):
         for u in unit_list:
             u.receive_move_command(destination)
            
     def update(self, dt):
-        pass
+        for u in self.all_units:
+            u.update(dt)

@@ -18,23 +18,19 @@ def get_next_list_item(original, the_list):
 
 class ParadeGround(object):
     def __init__(self):
-        self.window = pyglet.window.Window(width=800, height=600)
+        self.window = pyglet.window.Window(width=settings.WINDOW_WIDTH, height=settings.WINDOW_HEIGHT)
         self.mouse_test = MouseSelector()
         self.window.push_handlers(self.mouse_test)
         self.batch = pyglet.graphics.Batch()
         self.window.set_handler("on_draw", self.on_draw)
         self.all_graphics = []
         
-        pyglet.clock.schedule_interval(self.update, settings.FRAMERATE)
-        
-        
         # make units
         self.controller = orders.UnitController()
-        self.controller.load_units([tier_one.Sparkle] * 500)
+        self.controller.load_units([tier_one.Sparkle] * 15)
         self.window.push_handlers(self.controller)
-        for u in self.controller.all_units:
-            pyglet.clock.schedule_interval(u.update, settings.FRAMERATE)
-            u.select()
+        self.window.push_handlers(self.controller.keys)
+        pyglet.clock.schedule_interval(self.controller.update, settings.FRAMERATE)
         
     def add_rect(self):
         new_rect = self.batch.add(2, pyglet.gl.GL_LINES, None, 
@@ -52,9 +48,6 @@ class ParadeGround(object):
         self.batch.draw()
         self.mouse_test.batch.draw()
         self.controller.batch.draw()
-        
-    def update(self, dt):
-        pass        
         
                       
         
@@ -97,19 +90,21 @@ class SelectorRectangle(object):
         self.adjust_final(-10, -10)
         
     def create_rect(self):
-        self.graphic = self.batch.add(2, pyglet.gl.GL_LINES, None,
-                                        ('v2i/stream', (35, 35, 55, 55)),
-                                        ('c3B/stream', (0, 0, 255, 0, 255, 0))
+        self.graphic = self.batch.add(4, pyglet.gl.GL_LINE_LOOP, None,
+                                        ('v2i/stream', (0, 0, 0, 0, 0, 0, 0, 0)),
+                                        ('c3B/stream')
                                       )
 
     def adjust_origin(self, x, y):
         self.graphic.vertices[:2] = [x, y]
+        self.init_xy = [x, y]
         
     def adjust_final(self, x, y):
-        self.graphic.vertices[2:] = [x, y]
+        a, b = self.init_xy
+        self.graphic.vertices[2:] = [x, b, x, y, a, y]
         
     def update(self, dt):
-        self.graphic.colors = list(get_rand_RGBs()) + list(get_rand_RGBs())
+        self.graphic.colors = list(get_rand_RGBs()) + list(get_rand_RGBs()) + list(get_rand_RGBs()) + list(get_rand_RGBs())
         
 if __name__ == '__main__':
     game = ParadeGround()

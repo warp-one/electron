@@ -1,19 +1,11 @@
-from math import sqrt
+from math import sqrt, pi, sin, cos
 
 import pyglet
 
 from tools import *
-import settings, selectiontriangle
+from selectiontriangle import SelectionTriangle
+import settings
 
-def get_equilateral_vertices(center, radius, rotation=0):
-    x, y = center
-    r = radius
-    a = r/2
-    triangle_side = 2*a*sqrt(3)
-    bottom_left = x - triangle_side/2, y - a
-    bottom_right = x + triangle_side/2, y - a
-    top_center = x, y + r
-    return (list(bottom_left) + list(bottom_right) + list(top_center))
 
 class BasicUnit(pyglet.sprite.Sprite):
     def __init__(self, controller, *args, **kwargs):
@@ -31,8 +23,9 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.current_destination = None
         self.selection_indicator = None
         self.group = settings.FOREGROUND
-        self.rotation = 0
+        self.rotate_tick = .1 #1 * pi/180.
         self.nearby_units = []
+        self.moved = False
         
         self.init_graphic()
         
@@ -41,26 +34,20 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.y += dy
         for s in self.graphics:
             transform_vertex_list(dx, dy, s)
+        self.moved = True
         
     def select(self):
-        if self.selectable:
+        if self.selectable and not self.is_selected():
             self.selected = True
-        
-            if not self.selection_indicator:
-                self.selection_indicator = self.batch.add(3, pyglet.gl.GL_TRIANGLES, settings.MIDGROUND,
-                    ('v2f/stream', get_equilateral_vertices((self.x, self.y), self.RADIUS)
-        #            ('c3B', (0, 255, 0,
-        #                     255, 0, 0,
-        #                     0, 0, 255))
-                   ))
-                self.graphics.append(self.selection_indicator)
+            self.selection_indicator = SelectionTriangle(self)
+            self.graphics.append(self.selection_indicator.graphic)
         
     def deselect(self):
-        if self.is_selected:
+        if self.is_selected():
             self.selected = False
         if self.selection_indicator:
-            self.graphics.remove(self.selection_indicator)
-            self.selection_indicator.delete()
+            self.graphics.remove(self.selection_indicator.graphic)
+            self.selection_indicator.graphic.delete()
             self.selection_indicator = None
             
     def is_selected(self):
@@ -74,6 +61,9 @@ class BasicUnit(pyglet.sprite.Sprite):
         
     def get_nearby_units(self):
         self.nearby_units = find_units_in_circle((self.x, self.y), self.RADIUS, self.controller.all_units)
+        for u in self.nearby_units:
+            if u == self:
+                self.nearby_units.remove(self)
         return self.nearby_units
         
     def receive_move_command(self, destination):
@@ -107,16 +97,18 @@ class BasicUnit(pyglet.sprite.Sprite):
             for d in self.nearby_units:
                 if get_distance((d.x, d.y), (self.x, self.y)) < closest_unit_distance:
                     closest_unit = d
-                if self != d and get_distance((self.x, self.y), (d.x, d.y)) < self.RADIUS:
-                    if not self.current_command and not d.current_command:
+                if get_distance((self.x, self.y), (d.x, d.y)) < self.RADIUS:
+                    if self.current_command:
                         dx, dy = one_step_toward_destination((d.x, d.y), (self.x, self.y), (self.SHUFFLE_SPEED*dt))
                         self.move(-dx, -dy)
+                        d.move(dx, dy)
             self.get_nearby_units()
         else:
             self.current_command = None
         
     def update(self, dt):
+        self.moved = False
         if self.current_command:
             self.current_command(dt)
-        
-        
+        if self.selection_indicator:
+            self.selection_indicator.update(dt)
