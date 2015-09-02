@@ -35,7 +35,7 @@ class CollisionManager(object):
         self.grid_cells[i].append(unit)
         
     def check_collision_in_cell(self, cell):
-        
+        pass
         
     def on_notify(self, unit, event):
         if event == "CHANGED CELL":

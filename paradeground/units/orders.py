@@ -4,6 +4,8 @@ from pyglet.window import mouse, key
 import tools
 import settings,resources
 
+number_keys = [key._1, key._2, key._3, key._4]
+
 class UnitController(object):
     def __init__(self):
         self.batch = pyglet.graphics.Batch()
@@ -14,6 +16,19 @@ class UnitController(object):
         self.to_select = []
         
         self.keys = key.KeyStateHandler()
+        self.control_groups = []
+        for k in number_keys:
+            self.control_groups.append([])
+        
+    def on_key_press(self, button, modifiers):
+        if button in number_keys:
+            control_group_index = number_keys.index(button)
+            if modifiers & key.LCTRL:
+                self.control_groups[control_group_index] = self.get_selected_units()
+            else:
+                self.to_select = self.control_groups[number_keys.index(button)][:]
+                self.run_selection()
+            
 
     def on_mouse_press(self, x, y, buttons, modifiers):
         if buttons & mouse.LEFT:
@@ -22,11 +37,15 @@ class UnitController(object):
             self.init_xy = (x, y)
 
         if buttons & mouse.RIGHT:
-            selected_units = []
-            for u in self.all_units:
-                if u.is_selected():
-                    selected_units.append(u)
-            self.give_move_command(selected_units, (x, y))
+            self.give_move_command(self.get_selected_units(), (x, y))
+            
+    # an inefficiency here...        
+    def get_selected_units(self):
+        selected_units = []
+        for u in self.all_units:
+            if u.is_selected():
+                selected_units.append(u)
+        return selected_units
             
     def on_mouse_release(self, x, y, buttons, modifiers):
         if buttons & mouse.LEFT:
