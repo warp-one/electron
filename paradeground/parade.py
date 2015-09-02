@@ -5,7 +5,7 @@ import pyglet
 from pyglet.window import mouse
 from pyglet.gl import *
 
-import tools, settings
+import tools, settings, camera
 from selection import mouseselect as ms
 from units import tier_one, orders
 from collision import CollisionManager
@@ -13,16 +13,13 @@ from collision import CollisionManager
 
 class ParadeGround(object):
     def __init__(self):
-        self.window = pyglet.window.Window(width=settings.WINDOW_WIDTH, 
-                                           height=settings.WINDOW_HEIGHT)
-        self.mouse_test = ms.MouseSelector()
-        self.window.push_handlers(self.mouse_test)
+        self.window = camera.CameraWindow()
         self.batch = pyglet.graphics.Batch()
         self.window.set_handler("on_draw", self.on_draw)
         self.all_graphics = []
         
         # make units
-        self.controller = orders.UnitController()
+        self.controller = orders.UnitController(self.window)
         self.controller.load_units([tier_one.Sparkle] * 50)
         self.window.push_handlers(self.controller)
         self.window.push_handlers(self.controller.keys)
@@ -47,7 +44,8 @@ class ParadeGround(object):
     def on_draw(self):
         self.window.clear()
         self.collision_manager.debug()
-        self.mouse_test.batch.draw()
+        self.window.mouse_selector.batch.draw()
+        self.window.cam.apply()
         if settings.ANTI_ALIASING:
             pyglet.gl.glColor4f(1.0, 0, 0, 1.0)
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)                             

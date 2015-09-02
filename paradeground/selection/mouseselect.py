@@ -4,24 +4,31 @@ from pyglet.window import mouse
 import settings, tools
 
 class MouseSelector(object):
-    def __init__(self):
+    def __init__(self, parent_camera):
         self.batch = pyglet.graphics.Batch()
         self.selector_graphic = SelectorRectangle(self.batch)
         self.x, self.y = 0, 0
+        self.parent = parent_camera
         
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.x, self.y = x, y
+#    def on_mouse_motion(self, x, y, dx, dy):
+#        self.x, self.y = x, y
     
     def on_mouse_press(self, x, y, buttons, modifiers):
+        x += self.parent.x
+        y += self.parent.y
         if buttons & mouse.LEFT:
             self.selector_graphic.adjust_origin(x, y)
             self.selector_graphic.adjust_final(x, y)
             
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
+        x += self.parent.x
+        y += self.parent.y
         if buttons & mouse.LEFT:
             self.selector_graphic.adjust_final(x, y)
             
     def on_mouse_release(self, x, y, buttons, modifiers):
+        x += self.parent.x
+        y += self.parent.y
         if buttons & mouse.LEFT:
             self.selector_graphic.hide()
 
@@ -43,7 +50,7 @@ class SelectorRectangle(object):
         
     def create_rect(self):
         self.graphic = self.batch.add(4, pyglet.gl.GL_LINE_LOOP, None,
-                                        ('v2i/stream', (0, 0, 0, 0, 0, 0, 0, 0)),
+                                        ('v2f/stream', (0, 0, 0, 0, 0, 0, 0, 0)),
                                         ('c3B/stream')
                                       )
 

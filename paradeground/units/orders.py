@@ -7,11 +7,12 @@ import settings,resources
 number_keys = [key._1, key._2, key._3, key._4]
 
 class UnitController(object):
-    def __init__(self):
+    def __init__(self, window):
         self.batch = pyglet.graphics.Batch()
         self.all_units = []
         self.init_xy = (0, 0)
         self.final_xy = (0, 0)
+        self.controlled_window = window
 
         self.to_select = []
         
@@ -31,6 +32,8 @@ class UnitController(object):
             
 
     def on_mouse_press(self, x, y, buttons, modifiers):
+        x += self.wx
+        y += self.wy
         if buttons & mouse.LEFT:
             self.init_xy = (x, y)
         if buttons & mouse.LEFT:
@@ -48,6 +51,8 @@ class UnitController(object):
         return selected_units
             
     def on_mouse_release(self, x, y, buttons, modifiers):
+        x += self.wx
+        y += self.wy
         if buttons & mouse.LEFT:
             self.final_xy = (x, y)
             if self.keys[key.LSHIFT]:
@@ -133,5 +138,7 @@ class UnitController(object):
             u.receive_move_command(destination)
            
     def update(self, dt):
+        cam = self.controlled_window.cam
+        self.wx, self.wy = cam.x, cam.y
         for u in self.all_units:
             u.update(dt)

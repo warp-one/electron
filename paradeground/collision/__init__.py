@@ -1,17 +1,17 @@
-
+import settings
 
 class CollisionManager(object):
     def __init__(self, unit_list, game_size):
         self.all_units = unit_list
-        self.game_width = game_size[0]
-        self.game_height = game_size[1]
+        self.map_width = settings.MAP_WIDTH
+        self.map_height = settings.MAP_HEIGHT
         self.grid_cells = []
     
         self.CELL_SIZE = 150
         
     def create_grid(self):
-        self.grid_columns = int(self.game_width / self.CELL_SIZE) + 1
-        self.grid_rows = int(self.game_height / self.CELL_SIZE) + 1
+        self.grid_columns = int(self.map_width / self.CELL_SIZE) + 1
+        self.grid_rows = int(self.map_height / self.CELL_SIZE) + 1
         for _ in range(self.grid_columns*self.grid_rows):
             self.grid_cells.append([])
         
