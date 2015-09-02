@@ -55,3 +55,5 @@ class CollisionManager(object):
     def debug(self):
         for i, c in enumerate(self.grid_cells):
             pass
+            
+    

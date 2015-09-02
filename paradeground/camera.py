@@ -28,6 +28,7 @@ class GameCamera(object):
     def __init__(self):
         self.scrolling = False
         self.x_scroll, self.y_scroll = 0, 0
+        
 
     def view(self, width, height):
         self.w, self.h = width, height
@@ -45,11 +46,19 @@ class GameCamera(object):
         max_y = settings.MAP_HEIGHT - settings.WINDOW_HEIGHT
         min_y = 0
         new_x = self.x + dx
-        if new_x <= max_x and new_x >= min_x:
+        new_y = self.y + dy
+        if new_x >= max_x:
+            new_x = max_x
+        elif new_x <= min_x:
+            new_x = min_x
+        else:
             self.x = new_x
         
-        new_y = self.y + dy
-        if new_y <= max_y and new_y >= min_y:
+        if new_y >= max_y:
+            new_y = max_y
+        elif new_y <= min_y:
+            new_y = min_y
+        else:
             self.y = new_y
             
         new_z = self.z + dz
@@ -144,6 +153,12 @@ class GameCamera(object):
         if self.scrolling:
             dx = settings.SCROLL_SPEED * self.x_scroll
             dy = settings.SCROLL_SPEED * self.y_scroll
+            self.adjust_xyz(dx, dy, 0)
+            
+    def on_notify(self, unit, event):
+        if event == "CENTER CAMERA":
+            dx = unit.x - self.x - settings.WINDOW_WIDTH/2
+            dy = unit.y - self.y - settings.WINDOW_HEIGHT/2
             self.adjust_xyz(dx, dy, 0)
             
 

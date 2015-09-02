@@ -1,3 +1,5 @@
+from random import choice
+
 import pyglet
 from pyglet.window import mouse, key
 
@@ -15,20 +17,33 @@ class UnitController(object):
         self.controlled_window = window
 
         self.to_select = []
+        self.observers = []
         
         self.keys = key.KeyStateHandler()
         self.control_groups = []
+        self.key_repeat_timer = 0
+        self.last_key_pressed = None
         for k in number_keys:
             self.control_groups.append([])
         
     def on_key_press(self, button, modifiers):
+        if button == self.last_key_pressed:
+            self.repeat = True
+        else:
+            self.repeat = False
         if button in number_keys:
             control_group_index = number_keys.index(button)
             if modifiers & key.LCTRL:
                 self.control_groups[control_group_index] = self.get_selected_units()
             else:
+                if self.repeat and self.key_repeat_timer <= 1.:
+                    self.notify("CENTER CAMERA")
+                    
                 self.to_select = self.control_groups[number_keys.index(button)][:]
                 self.run_selection()
+                self.key_repeat_timer = 0
+
+        self.last_key_pressed = button
             
 
     def on_mouse_press(self, x, y, buttons, modifiers):
@@ -142,3 +157,14 @@ class UnitController(object):
         self.wx, self.wy = cam.x, cam.y
         for u in self.all_units:
             u.update(dt)
+        self.key_repeat_timer += dt
+        
+    def add_observer(self, observer):
+        self.observers.append(observer)
+        
+    def remove_observer(self, observer):
+        self.observers.remove(observer)
+        
+    def notify(self, event):
+        for o in self.observers:
+            o.on_notify(choice(self.get_selected_units()), event)

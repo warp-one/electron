@@ -21,6 +21,7 @@ class ParadeGround(object):
         # make units
         self.controller = orders.UnitController(self.window)
         self.controller.load_units([tier_one.Sparkle] * 50)
+        self.controller.add_observer(self.window.cam)
         self.window.push_handlers(self.controller)
         self.window.push_handlers(self.controller.keys)
         pyglet.clock.schedule_interval(self.controller.update, settings.FRAMERATE)
