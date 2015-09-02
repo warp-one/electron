@@ -1,9 +1,9 @@
-from math import sqrt, pi, sin, cos
+from math import sqrt, pi, sin, cos, tan, degrees
 
 import pyglet
 
 from tools import *
-from selectiontriangle import SelectionTriangle
+from selection import selectiontriangle as st
 import settings
 
 
@@ -12,34 +12,51 @@ class BasicUnit(pyglet.sprite.Sprite):
         super(BasicUnit, self).__init__(*args, **kwargs)
         
         self.controller = controller
-        self.SIZE = 30
-        self.SPEED = 300.0 # pixels per frame
-        self.SHUFFLE_SPEED = 50.0
-        self.RADIUS = self.SIZE/2
-        self.graphics = []
-        self.selected = False
-        self.selectable = False
         self.current_command = None
         self.current_destination = None
-        self.selection_indicator = None
+        self.graphics = []
         self.group = settings.FOREGROUND
-        self.rotate_tick = .1 #1 * pi/180.
-        self.nearby_units = []
+        self.sgroup = settings.MIDGROUND
         self.moved = False
-        
-        self.init_graphic()
+        self.nearby_units = []
+        self.observers = []
+        self.rotate_tick = .1 #1 * pi/180.
+        self.rotation = 0
+        self.selectable = False
+        self.selected = False
+        self.selection_indicator = None
+        self.selection_rotation = 0  
+
+        # CONSTANTS
+        self.CELL_SIZE = settings.CELL_SIZE
+        self.ROTATION_RATE = 1 * pi/180 # radians = degrees * pi/180
+        self.SELECTION_SCALE = 2
+        self.SIZE = 30
+        self.RADIUS = self.SIZE/2
+        self.CLAUSTROPHOBIA = self.SIZE*2
+        self.SPEED = 300.0 # pixels per frame
+        self.UNBUNCH_SPEED = 40.0
         
     def move(self, dx, dy):
+        c = self.CELL_SIZE
+        self.current_quadrant = int(self.x/c), int(self.y/c)
+        self.rotation = tan(dy/dx)
+        
         self.x += dx
         self.y += dy
-        for s in self.graphics:
-            transform_vertex_list(dx, dy, s)
+        
+        self.new_quadrant = int(self.x/c), int(self.y/c)
+        if self.current_quadrant != self.new_quadrant:
+            self.notify("CHANGED CELL")
+        
+        #for s in self.graphics:
+        #    transform_vertex_list(dx, dy, s)
         self.moved = True
         
     def select(self):
         if self.selectable and not self.is_selected():
             self.selected = True
-            self.selection_indicator = SelectionTriangle(self)
+            self.selection_indicator = st.SelectionTriangle(self)
             self.graphics.append(self.selection_indicator.graphic)
         
     def deselect(self):
@@ -56,11 +73,9 @@ class BasicUnit(pyglet.sprite.Sprite):
         else:
             return False
         
-    def init_graphic(self):
-        pass
         
     def get_nearby_units(self):
-        self.nearby_units = find_units_in_circle((self.x, self.y), self.RADIUS, self.controller.all_units)
+        self.nearby_units = find_units_in_circle((self.x, self.y), self.CLAUSTROPHOBIA*5, self.controller.all_units)
         for u in self.nearby_units:
             if u == self:
                 self.nearby_units.remove(self)
@@ -80,11 +95,14 @@ class BasicUnit(pyglet.sprite.Sprite):
             self.current_command = None
         
     def _walking(self, dt):
-        if get_distance((self.x, self.y), (self.current_destination[0], self.current_destination[1])) > 10:
+        d_from_destination = get_distance((self.x, self.y), 
+                                          (self.current_destination[0], self.current_destination[1])
+                                          )
+        if d_from_destination > 10:
             distance_traveled = self.SPEED * dt
             dx, dy = one_step_toward_destination(self.current_destination, 
                                                  (self.x, self.y), 
-                                                  distance_traveled)
+                                                 distance_traveled)
             self.move(dx, dy)
         else:
             self.arrive()
@@ -97,18 +115,43 @@ class BasicUnit(pyglet.sprite.Sprite):
             for d in self.nearby_units:
                 if get_distance((d.x, d.y), (self.x, self.y)) < closest_unit_distance:
                     closest_unit = d
-                if get_distance((self.x, self.y), (d.x, d.y)) < self.RADIUS:
+                if get_distance((self.x, self.y), (d.x, d.y)) < self.CLAUSTROPHOBIA*5:
                     if self.current_command:
-                        dx, dy = one_step_toward_destination((d.x, d.y), (self.x, self.y), (self.SHUFFLE_SPEED*dt))
+                        dx, dy = one_step_toward_destination((d.x, d.y), 
+                                                             (self.x, self.y), 
+                                                             (self.UNBUNCH_SPEED*dt))
                         self.move(-dx, -dy)
                         d.move(dx, dy)
             self.get_nearby_units()
         else:
             self.current_command = None
         
+
     def update(self, dt):
         self.moved = False
         if self.current_command:
             self.current_command(dt)
         if self.selection_indicator:
             self.selection_indicator.update(dt)
+            
+        x, y = self.x, self.y
+        self.flat_poly.vertices = rotate_triangle((0, 0), self.RADIUS, self.rotation, (x, y))
+        
+        self.tick_selection_rotation()
+
+    def tick_selection_rotation(self):
+        self.selection_rotation += self.ROTATION_RATE
+
+    def init_graphics(self):
+        pass
+
+    def add_observer(self, observer):
+        self.observers.append(observer)
+        self.CELL_SIZE = observer.CELL_SIZE
+        
+    def remove_observer(self, observer):
+        self.observers.remove(observer)
+        
+    def notify(self, event):
+        for o in self.observers:
+            o.on_notify(self, event)
