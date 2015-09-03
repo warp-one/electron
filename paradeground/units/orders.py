@@ -6,7 +6,7 @@ from pyglet.window import mouse, key
 import tools
 import settings,resources
 
-number_keys = [key._1, key._2, key._3, key._4]
+number_keys = [key._1, key._2, key._3, key._4, key.Q, key.W, key.E, key.R]
 
 class UnitController(object):
     def __init__(self, window):
@@ -36,10 +36,12 @@ class UnitController(object):
             if modifiers & key.LCTRL:
                 self.control_groups[control_group_index] = self.get_selected_units()
             else:
-                if self.repeat and self.key_repeat_timer <= 1.:
-                    self.notify("CENTER CAMERA")
-                    
                 self.to_select = self.control_groups[number_keys.index(button)][:]
+                if self.repeat and self.key_repeat_timer <= 3.:
+                    random_selected_unit = choice(self.to_select)
+                    unit_loc = random_selected_unit.x, random_selected_unit.y
+                    self.notify(unit_loc, "CENTER CAMERA")
+                    
                 self.run_selection()
                 self.key_repeat_timer = 0
 
@@ -165,6 +167,6 @@ class UnitController(object):
     def remove_observer(self, observer):
         self.observers.remove(observer)
         
-    def notify(self, event):
+    def notify(self, unit, event):
         for o in self.observers:
-            o.on_notify(choice(self.get_selected_units()), event)
+            o.on_notify(unit, event)

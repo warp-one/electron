@@ -1,3 +1,19 @@
+## THE WILLIAM'S_FIRST_PYGLET_RTS CHEERLEADING COMMENT SECTION
+# Noun phrases for data attributes and variables, verbs or prepositions begin
+# methods and functions
+#
+# This could be a fun experiment or it could be a "neat game" or it could be an
+# actual Complex, Competitive Real Time Strategy. In a few years it could even 
+# be "An RTS Engine for Pyglet (and Cocos2D). Keep refactoring and cleaning up
+# so that it isn't intercoupled into one hopeless mess. Good work so far,
+# especially on the small, visible refinements.
+#
+## TO OTHERS
+#
+# Send fun pyglet tips and tricks, interesting comments, or teaching criticisms
+# to wrschuller at gmail. 
+
+
 from random import choice, randint
 from math import sqrt
 
@@ -7,9 +23,9 @@ from pyglet.gl import *
 
 import tools, settings, camera
 from selection import mouseselect as ms
-from units import tier_one, orders
+from units import tier_one, orders, doodads
 from collision import CollisionManager
-
+from resources import mote
 
 class ParadeGround(object):
     def __init__(self):
@@ -19,17 +35,25 @@ class ParadeGround(object):
         self.all_graphics = []
         
         # make units
-        self.controller = orders.UnitController(self.window)
-        self.controller.load_units([tier_one.Sparkle] * 50)
-        self.controller.add_observer(self.window.cam)
-        self.window.push_handlers(self.controller)
-        self.window.push_handlers(self.controller.keys)
-        pyglet.clock.schedule_interval(self.controller.update, settings.FRAMERATE)
-        self.collision_manager = CollisionManager(self.controller.all_units, 
+        self.unit_controller = orders.UnitController(self.window)
+        self.unit_controller.load_units([tier_one.Sparkle] * 50)
+        self.unit_controller.add_observer(self.window.cam)
+        self.window.push_handlers(self.unit_controller)
+        self.window.push_handlers(self.unit_controller.keys)
+        pyglet.clock.schedule_interval(self.unit_controller.update, settings.FRAMERATE)
+        self.collision_manager = CollisionManager(self.unit_controller.all_units, 
                                                   (settings.WINDOW_WIDTH,
                                                   settings.WINDOW_HEIGHT))
         self.collision_manager.create_grid()
         self.collision_manager.distribute_units()
+        
+        # TODO: A level/map class for each stage
+        self.all_graphics.append(doodads.MapBorder(img=mote, 
+                                                   x=0, 
+                                                   y=0, 
+                                                   group=settings.BACKGROUND, 
+                                                   batch=self.batch)
+                                                   )
         
     def add_rect(self):
         new_rect = self.batch.add(2, pyglet.gl.GL_LINES, None, 
@@ -58,7 +82,7 @@ class ParadeGround(object):
             glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE)                                     
             glLineWidth (1)                                                                
         self.batch.draw()
-        self.controller.batch.draw()
+        self.unit_controller.batch.draw()
         
 if __name__ == '__main__':
     game = ParadeGround()

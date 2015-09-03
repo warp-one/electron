@@ -51,15 +51,13 @@ class GameCamera(object):
             new_x = max_x
         elif new_x <= min_x:
             new_x = min_x
-        else:
-            self.x = new_x
+        self.x = new_x
         
         if new_y >= max_y:
             new_y = max_y
         elif new_y <= min_y:
             new_y = min_y
-        else:
-            self.y = new_y
+        self.y = new_y
             
         new_z = self.z + dz
         self.z = new_z
@@ -72,6 +70,11 @@ class GameCamera(object):
         glOrtho(0, self.w, 0, self.h, -1, self.far)
         glMatrixMode(GL_MODELVIEW)
 
+    def center_camera(self, x, y, z=0):
+        dx = x - self.x - settings.WINDOW_WIDTH/2
+        dy = y - self.y - settings.WINDOW_HEIGHT/2
+        self.adjust_xyz(dx, dy, 0)
+        
     def isometric(self):
         """ Isometric projection.
         """
@@ -155,11 +158,12 @@ class GameCamera(object):
             dy = settings.SCROLL_SPEED * self.y_scroll
             self.adjust_xyz(dx, dy, 0)
             
-    def on_notify(self, unit, event):
+    def on_notify(self, event_location, event):
+        x, y = event_location
         if event == "CENTER CAMERA":
-            dx = unit.x - self.x - settings.WINDOW_WIDTH/2
-            dy = unit.y - self.y - settings.WINDOW_HEIGHT/2
-            self.adjust_xyz(dx, dy, 0)
+            self.center_camera(x, y)
+            
+         
             
 
 class CameraWindow(pyglet.window.Window):
