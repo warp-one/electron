@@ -17,10 +17,17 @@ class BasicUnit(pyglet.sprite.Sprite):
     SPEED = 300.0 # pixels per frame
     UNBUNCH_SPEED = 40.0
 
-    def __init__(self, controller, *args, **kwargs):
+    def __init__(self, controller, grid, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
         
         self.controller = controller
+        # grid
+        self.grid = grid
+        self.prev = None
+        self.next = None
+        if self.grid:
+            self.grid.add(self)
+        
         self.current_command = None
         self.current_destination = None
         self.graphics = []
@@ -35,13 +42,11 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.selected = False
         self.selection_indicator = None
         self.selection_rotation = 0  
-
-        # CONSTANTS
         
     def move(self, dx, dy):
+        self.grid.move(self, dx, dy)
         self.old_x, self.old_y = self.x, self.y
         self.new_x, self.new_y = self.x + dx, self.y + dy
-        self.notify("MOVE")
         
     def proceed(self):
         self.x, self.y = self.new_x, self.new_y
@@ -66,7 +71,6 @@ class BasicUnit(pyglet.sprite.Sprite):
             return True
         else:
             return False
-        
         
     def get_nearby_units(self):
         self.nearby_units = find_units_in_circle((self.x, self.y), self.CLAUSTROPHOBIA*5, self.controller.all_units)
@@ -138,13 +142,3 @@ class BasicUnit(pyglet.sprite.Sprite):
 
     def init_graphics(self):
         pass
-
-    def add_observer(self, observer):
-        self.observers.append(observer)
-        
-    def remove_observer(self, observer):
-        self.observers.remove(observer)
-        
-    def notify(self, event):
-        for o in self.observers:
-            o.on_notify(self, event)

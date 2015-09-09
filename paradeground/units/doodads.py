@@ -11,7 +11,7 @@ def combine_tuples(list_tuples):
 
 class MapBorder(BasicUnit):
     def __init__(self, *args, **kwargs):
-        super(MapBorder, self).__init__(None, *args, **kwargs)
+        super(MapBorder, self).__init__(None, None, *args, **kwargs)
         mw = settings.MAP_WIDTH
         mh = settings.MAP_HEIGHT
         bt = 50 # border thickness

@@ -30,7 +30,6 @@ class UnitController(object):
         self.collision_manager = CollisionManager(self.all_units, 
                                                   (settings.WINDOW_WIDTH,
                                                   settings.WINDOW_HEIGHT))
-        self.collision_manager.create_grid()
             
         
     def on_key_press(self, button, modifiers):
@@ -91,16 +90,14 @@ class UnitController(object):
         
     def load_units(self, unit_list):
         for u in unit_list:
-            new_unit = u(self, img=resources.mote, x=50., y=50., 
+            new_unit = u(self, 
+                         self.collision_manager.grid,
+                         img=resources.mote, x=50., y=50., 
                          batch=self.batch, 
                          group=settings.FOREGROUND)
             self.all_units.append(new_unit)
-        self.collision_manager.distribute_units(self.all_units)
         for u in self.all_units:
             u.move(randint(100, 700), randint(100, 500))
-        for u in self.all_units:
-            self.collision_manager.sort_unit(u)
-
     
     def kill_units(self, unit_list):
         for u in unit_list:
