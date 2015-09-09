@@ -41,11 +41,6 @@ class ParadeGround(object):
         self.window.push_handlers(self.unit_controller)
         self.window.push_handlers(self.unit_controller.keys)
         pyglet.clock.schedule_interval(self.unit_controller.update, settings.FRAMERATE)
-        self.collision_manager = CollisionManager(self.unit_controller.all_units, 
-                                                  (settings.WINDOW_WIDTH,
-                                                  settings.WINDOW_HEIGHT))
-        self.collision_manager.create_grid()
-        self.collision_manager.distribute_units()
         
         # TODO: A level/map class for each stage
         self.all_graphics.append(doodads.MapBorder(img=mote, 
@@ -68,7 +63,6 @@ class ParadeGround(object):
         
     def on_draw(self):
         self.window.clear()
-        self.collision_manager.debug()
         self.window.mouse_selector.batch.draw()
         self.window.cam.apply()
         if settings.ANTI_ALIASING:

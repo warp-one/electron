@@ -8,6 +8,15 @@ import settings
 
 
 class BasicUnit(pyglet.sprite.Sprite):
+
+    ROTATION_RATE = 1 * pi/180 # radians = degrees * pi/180
+    SELECTION_SCALE = 2
+    SIZE = 30
+    RADIUS = SIZE/2
+    CLAUSTROPHOBIA = SIZE*2
+    SPEED = 300.0 # pixels per frame
+    UNBUNCH_SPEED = 40.0
+
     def __init__(self, controller, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
         
@@ -28,29 +37,14 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.selection_rotation = 0  
 
         # CONSTANTS
-        self.CELL_SIZE = settings.CELL_SIZE
-        self.ROTATION_RATE = 1 * pi/180 # radians = degrees * pi/180
-        self.SELECTION_SCALE = 2
-        self.SIZE = 30
-        self.RADIUS = self.SIZE/2
-        self.CLAUSTROPHOBIA = self.SIZE*2
-        self.SPEED = 300.0 # pixels per frame
-        self.UNBUNCH_SPEED = 40.0
         
     def move(self, dx, dy):
-        c = self.CELL_SIZE
-        self.current_quadrant = int(self.x/c), int(self.y/c)
-        self.rotation = tan(dy/dx)
+        self.old_x, self.old_y = self.x, self.y
+        self.new_x, self.new_y = self.x + dx, self.y + dy
+        self.notify("MOVE")
         
-        self.x += dx
-        self.y += dy
-        
-        self.new_quadrant = int(self.x/c), int(self.y/c)
-        if self.current_quadrant != self.new_quadrant:
-            self.notify("CHANGED CELL")
-        
-        #for s in self.graphics:
-        #    transform_vertex_list(dx, dy, s)
+    def proceed(self):
+        self.x, self.y = self.new_x, self.new_y
         self.moved = True
         
     def select(self):
@@ -109,7 +103,7 @@ class BasicUnit(pyglet.sprite.Sprite):
             self.current_destination = None
             
     def _unbunch(self, dt):
-        closest_unit_distance = 1000
+        closest_unit_distance = 60
         closest_unit = None
         if self.nearby_units:
             for d in self.nearby_units:
@@ -147,7 +141,6 @@ class BasicUnit(pyglet.sprite.Sprite):
 
     def add_observer(self, observer):
         self.observers.append(observer)
-        self.CELL_SIZE = observer.CELL_SIZE
         
     def remove_observer(self, observer):
         self.observers.remove(observer)

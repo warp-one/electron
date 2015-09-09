@@ -15,7 +15,6 @@ class Sparkle(BasicUnit):
         self.RADIUS = self.SIZE/2
         self.CLAUSTROPHOBIA = 5        
         self.init_graphics()
-        self.move(randint(100, 700), randint(100, 500))
         
     def init_graphics(self):
         x, y = self.x, self.y

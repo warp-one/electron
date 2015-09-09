@@ -1,10 +1,11 @@
-from random import choice
+from random import choice, randint
 
 import pyglet
 from pyglet.window import mouse, key
 
 import tools
 import settings,resources
+from collision import CollisionManager
 
 number_keys = [key._1, key._2, key._3, key._4, key.Q, key.W, key.E, key.R]
 
@@ -25,8 +26,15 @@ class UnitController(object):
         self.last_key_pressed = None
         for k in number_keys:
             self.control_groups.append([])
+            
+        self.collision_manager = CollisionManager(self.all_units, 
+                                                  (settings.WINDOW_WIDTH,
+                                                  settings.WINDOW_HEIGHT))
+        self.collision_manager.create_grid()
+            
         
     def on_key_press(self, button, modifiers):
+        print self.collision_manager.grid_cells
         if button == self.last_key_pressed:
             self.repeat = True
         else:
@@ -87,6 +95,12 @@ class UnitController(object):
                          batch=self.batch, 
                          group=settings.FOREGROUND)
             self.all_units.append(new_unit)
+        self.collision_manager.distribute_units(self.all_units)
+        for u in self.all_units:
+            u.move(randint(100, 700), randint(100, 500))
+        for u in self.all_units:
+            self.collision_manager.sort_unit(u)
+
     
     def kill_units(self, unit_list):
         for u in unit_list:
@@ -157,6 +171,7 @@ class UnitController(object):
     def update(self, dt):
         cam = self.controlled_window.cam
         self.wx, self.wy = cam.x, cam.y
+        self.collision_manager.update(dt)
         for u in self.all_units:
             u.update(dt)
         self.key_repeat_timer += dt

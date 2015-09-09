@@ -61,6 +61,11 @@ class GameCamera(object):
             
         new_z = self.z + dz
         self.z = new_z
+        
+    def center_camera(self, x, y, z=0):
+        dx = x - self.x - settings.WINDOW_WIDTH/2
+        dy = y - self.y - settings.WINDOW_HEIGHT/2
+        self.adjust_xyz(dx, dy, 0)
             
     def default(self):
         """ Default pyglet projection.
@@ -69,11 +74,6 @@ class GameCamera(object):
         glLoadIdentity()
         glOrtho(0, self.w, 0, self.h, -1, self.far)
         glMatrixMode(GL_MODELVIEW)
-
-    def center_camera(self, x, y, z=0):
-        dx = x - self.x - settings.WINDOW_WIDTH/2
-        dy = y - self.y - settings.WINDOW_HEIGHT/2
-        self.adjust_xyz(dx, dy, 0)
         
     def isometric(self):
         """ Isometric projection.
