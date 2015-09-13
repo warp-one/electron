@@ -62,3 +62,14 @@ def rotate_triangle(origin, radius, rotation, location):
     
 def get_rand_RGBs(lower=0, upper=255):
     return (randint(lower, upper), randint(lower, upper), randint(lower, upper))
+
+def get_dot_product(V1, V2):
+    return V1[0]*V2[0] + V1[1]*V2[1]
+    
+def get_average_location(unit_list):
+    a, b = 0, 0
+    for u in unit_list:
+        a += u.x
+        b += u.y
+    return a/len(unit_list), b/len(unit_list)
+    

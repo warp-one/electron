@@ -42,15 +42,14 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.selected = False
         self.selection_indicator = None
         self.selection_rotation = 0  
+        self.recent_locations = []
+        self.dx, self.dy = 0, 0
         
     def move(self, dx, dy):
-        self.grid.move(self, dx, dy)
-        self.old_x, self.old_y = self.x, self.y
-        self.new_x, self.new_y = self.x + dx, self.y + dy
-        
-    def proceed(self):
-        self.x, self.y = self.new_x, self.new_y
-        self.moved = True
+        self.dx, self.dy = dx, dy
+        if self.grid.get_collision(self, dx, dy):
+            self.grid.move(self, dx, dy)
+        self.dx, self.dy = 0, 0
         
     def select(self):
         if self.selectable and not self.is_selected():
@@ -79,18 +78,25 @@ class BasicUnit(pyglet.sprite.Sprite):
                 self.nearby_units.remove(self)
         return self.nearby_units
         
-    def receive_move_command(self, destination):
+    def receive_gather_command(self, destination):
         self.current_command = self._walking
         self.current_destination = destination
+
+    def receive_move_command(self, origin, destination):
+        self.current_command = self._walking
+        self.current_destination = (destination[0] + self.x - origin[0], destination[1] + self.y - origin[1])
         
     def receive_unbunch_command(self):
         self.current_command = self._unbunch
         
     def arrive(self):
-        if self.get_nearby_units():
-            self.receive_unbunch_command()
-        else:
-            self.current_command = None
+#        if self.get_nearby_units():
+#            self.receive_unbunch_command()
+#        else:
+        self.current_command = None
+            
+    def is_moving(self):
+        return self.moving
         
     def _walking(self, dt):
         d_from_destination = get_distance((self.x, self.y), 

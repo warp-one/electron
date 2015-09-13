@@ -33,7 +33,6 @@ class UnitController(object):
             
         
     def on_key_press(self, button, modifiers):
-        print self.collision_manager.grid_cells
         if button == self.last_key_pressed:
             self.repeat = True
         else:
@@ -64,7 +63,10 @@ class UnitController(object):
             self.init_xy = (x, y)
 
         if buttons & mouse.RIGHT:
-            self.give_move_command(self.get_selected_units(), (x, y))
+            units_to_order = self.get_selected_units()
+            if units_to_order:
+                origin = tools.get_average_location(units_to_order)
+                self.give_move_command(self.get_selected_units(), origin, (x, y))
             
     # an inefficiency here...        
     def get_selected_units(self):
@@ -118,9 +120,6 @@ class UnitController(object):
                     self.to_select.append(u)
                 elif self.keys[key.LSHIFT] and u.is_selected():
                     self.to_select.remove(u)
-#            else:
-#                if self.keys[key.LSHIFT] or self.keys[key.RSHIFT]:
-#                    self.to_select.append(u)
         self.run_selection()
             
     def select_in_area(self):
@@ -161,9 +160,20 @@ class UnitController(object):
                 self.to_select.append(u)
         self.run_selection()
             
-    def give_move_command(self, unit_list, destination):
-        for u in unit_list:
-            u.receive_move_command(destination)
+    def give_move_command(self, unit_list, origin, destination):
+        exes = [unit.x for unit in unit_list]
+        whys = [unit.y for unit in unit_list]
+        min_x = min(exes)
+        max_x = max(exes)
+        min_y = min(whys)
+        max_y = max(whys)
+        a, b = destination
+        if a >= min_x and a <= max_x and b >= min_y and b <= max_y:
+            for u in unit_list:
+                u.receive_gather_command(destination)
+        else:
+            for u in unit_list:
+                u.receive_move_command(origin, destination)
            
     def update(self, dt):
         cam = self.controlled_window.cam
