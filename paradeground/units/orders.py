@@ -44,9 +44,7 @@ class UnitController(object):
             else:
                 self.to_select = self.control_groups[number_keys.index(button)][:]
                 if self.repeat and self.key_repeat_timer <= 3.:
-                    random_selected_unit = choice(self.to_select)
-                    unit_loc = random_selected_unit.x, random_selected_unit.y
-                    self.notify(unit_loc, "CENTER CAMERA")
+                    self.notify(tools.get_average_location(self.to_select), "CENTER CAMERA")
                     
                 self.run_selection()
                 self.key_repeat_timer = 0
@@ -99,7 +97,7 @@ class UnitController(object):
                          group=settings.FOREGROUND)
             self.all_units.append(new_unit)
         for u in self.all_units:
-            u.move(randint(100, 700), randint(100, 500))
+            self.collision_manager.grid.move(u, randint(100, 1700), randint(100, 1700))
     
     def kill_units(self, unit_list):
         for u in unit_list:

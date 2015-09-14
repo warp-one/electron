@@ -25,9 +25,10 @@ class GameCamera(object):
     far = 8192
     fov = 60
     
-    def __init__(self):
+    def __init__(self, window):
         self.scrolling = False
         self.x_scroll, self.y_scroll = 0, 0
+        self.win = window
         
 
     def view(self, width, height):
@@ -63,8 +64,8 @@ class GameCamera(object):
         self.z = new_z
         
     def center_camera(self, x, y, z=0):
-        dx = x - self.x - settings.WINDOW_WIDTH/2
-        dy = y - self.y - settings.WINDOW_HEIGHT/2
+        dx = x - self.x - self.win.width/2
+        dy = y - self.y - self.win.height/2
         self.adjust_xyz(dx, dy, 0)
             
     def default(self):
@@ -115,6 +116,7 @@ class GameCamera(object):
             
         else: print "KEY " + key.symbol_string(symbol)
 
+    # currenly not hooked up to anything
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         """ Mouse drag event handler.
         """
@@ -126,21 +128,9 @@ class GameCamera(object):
             self.ry += dx/4.
             self.rx -= dy/4.
             
-    def on_mouse_leave(self, x, y):
-        self.x_scroll, self.y_scroll = 0, 0
-        if x > settings.WINDOW_WIDTH:
-            self.x_scroll = 1
-        elif x < 0:
-            self.x_scroll = -1
-        if y > settings.WINDOW_HEIGHT:
-            self.y_scroll = 1
-        elif y < 0:
-            self.y_scroll = -1
-        self.scrolling = True
+    def on_mouse_motion(x, y, dx, dy):
+        pass
         
-    def on_mouse_enter(self, x, y):
-        self.x_scroll, self.y_scroll = 0, 0
-        self.scrolling = False
 
     def apply(self):
         """ Apply camera transformation.
@@ -172,14 +162,43 @@ class CameraWindow(pyglet.window.Window):
                                            width=settings.WINDOW_WIDTH,
                                            height=settings.WINDOW_HEIGHT)
         opengl_init()
-        self.cam = GameCamera()
+        self.cam = GameCamera(self)
         self.on_resize = self.cam.view
         self.on_key_press = self.cam.key
         #self.on_mouse_drag = self.cam.on_mouse_drag
-        self.on_mouse_enter = self.cam.on_mouse_enter
-        self.on_mouse_leave = self.cam.on_mouse_leave
         
         self.mouse_selector = ms.MouseSelector(self.cam)
         self.push_handlers(self.mouse_selector)
         
         pyglet.clock.schedule_interval(self.cam.scroll, settings.FRAMERATE)
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        self.pan(x, y)
+            
+    def on_mouse_leave(self, x, y):
+        self.pan(x, y)
+
+    def on_mouse_enter(self, x, y):
+        self.scrolling = False
+
+    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
+        self.pan(x, y)
+        
+    def pan(self, x, y):
+        self.cam.scrolling = False 
+        if x <= 10:
+            self.cam.scrolling = True
+            self.cam.x_scroll = -1
+        elif x >= self.width-10:
+            self.cam.scrolling = True
+            self.cam.x_scroll = 1
+        else:
+            self.cam.x_scroll = 0
+        if y <= 10:
+            self.cam.scrolling = True
+            self.cam.y_scroll = -1
+        elif y >= self.height-10:
+            self.cam.scrolling = True
+            self.cam.y_scroll = 1
+        else:
+            self.cam.y_scroll = 0

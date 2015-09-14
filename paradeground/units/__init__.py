@@ -11,7 +11,7 @@ class BasicUnit(pyglet.sprite.Sprite):
 
     ROTATION_RATE = 1 * pi/180 # radians = degrees * pi/180
     SELECTION_SCALE = 2
-    SIZE = 30
+    SIZE = 32
     RADIUS = SIZE/2
     CLAUSTROPHOBIA = SIZE*2
     SPEED = 300.0 # pixels per frame
@@ -94,7 +94,6 @@ class BasicUnit(pyglet.sprite.Sprite):
 #            self.receive_unbunch_command()
 #        else:
         self.current_command = None
-        self.stop()
             
     def is_moving(self):
         return self.moving

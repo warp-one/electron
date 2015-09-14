@@ -1,10 +1,10 @@
 import pyglet
 
-import tools
+import tools, settings
 
 class Grid(object):
 
-    cell_size = 150
+    cell_size = 100
 
     def __init__(self, map_width, map_height):
         self.cells = []
@@ -58,37 +58,36 @@ class Grid(object):
         
     def handle_unit(self, unit, other):
         flagged = set()
+        adjusts = set()
         while other != None:
             x1, y1 = unit.x + unit.dx, unit.y + unit.dy
             x2, y2 = other.x + other.dx, other.y + other.dy
             distance = tools.get_distance((x1, y1), (x2, y2))
             if distance <= unit.RADIUS + other.RADIUS:
                 flagged.update([unit, other])
+                unit.dx, unit.dy = 0, 0
+                other.dx, other.dy = 0, 0
                 if distance < unit.RADIUS + other.RADIUS:
                     dx, dy = tools.one_step_toward_destination((other.x, other.y), 
                                      (unit.x, unit.y), 
                                      (10./6))
-                    self.move(unit, -dx, -dy)
-                    self.move(other, dx, dy)
+                                     
+                                     
+                    unit.dx, unit.dy = -dx, -dy
+                    other.dx, other.dy = dx, dy
                     unit.arrive()
                     other.arrive()
-
+                    adjusts.update([unit, other])
             other = other.next
+        flagged.difference_update(adjusts)
         return flagged
         
-    def get_collision(self, unit, dx, dy):
-        if self.collision:
-            cellX, cellY = int(unit.x/self.cell_size), int(unit.y/self.cell_size)
-            too_close_units = self.handle_cell(cellX, cellY)
-            if unit in too_close_units:
-                return False
-            else:
-                return True
-        else:
-            return True
-            
     def move(self, unit, dx, dy):
         x, y = unit.x + dx, unit.y + dy
+        if x > settings.MAP_WIDTH:
+            x = settings.MAP_WIDTH - 1
+        if y > settings.MAP_HEIGHT:
+            y = settings.MAP_HEIGHT - 1
         old_cellX = int(unit.x/self.cell_size)
         old_cellY = int(unit.y/self.cell_size)
         
