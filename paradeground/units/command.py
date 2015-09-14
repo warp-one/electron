@@ -12,7 +12,7 @@ class CommandQueue(object):
         self.queue = []
         
     def update(self, dt):
-        if self.active = None:
+        if self.active == None:
             if self.queue:  
                 self.active = self.queue.pop(0)
         else:

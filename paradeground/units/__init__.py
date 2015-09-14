@@ -4,7 +4,7 @@ import pyglet
 
 from tools import *
 from selection import selectiontriangle as st
-import settings
+import settings, command
 
 
 class BasicUnit(pyglet.sprite.Sprite):
@@ -13,9 +13,7 @@ class BasicUnit(pyglet.sprite.Sprite):
     SELECTION_SCALE = 2
     SIZE = 32
     RADIUS = SIZE/2
-    CLAUSTROPHOBIA = SIZE*2
     SPEED = 300.0 # pixels per frame
-    UNBUNCH_SPEED = 40.0
 
     def __init__(self, controller, grid, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
@@ -33,7 +31,6 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.graphics = []
         self.group = settings.FOREGROUND
         self.sgroup = settings.MIDGROUND
-        self.moved = False
         self.nearby_units = []
         self.observers = []
         self.rotate_tick = .1 #1 * pi/180.
@@ -42,11 +39,19 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.selected = False
         self.selection_indicator = None
         self.selection_rotation = 0  
-        self.recent_locations = []
         self.dx, self.dy = 0, 0
+        self.old_x, self.old_y = 0, 0
+        self.command_set = command.CommandQueue()
         
     def move(self, dx, dy):
         self.dx, self.dy = dx, dy
+        self.old_x, self.old_y = self.x, self.y
+        
+    def rotate(self, dx, dy):
+        position = self.old_x, self.old_y
+        mark = self.x + dx, self.y + dy
+        heading = get_angle_in_radians(position, mark)
+        self.rotation = heading
             
     def stop(self):
         self.dx, self.dy = 0, 0
@@ -70,29 +75,17 @@ class BasicUnit(pyglet.sprite.Sprite):
             return True
         else:
             return False
-        
-    def get_nearby_units(self):
-        self.nearby_units = find_units_in_circle((self.x, self.y), self.CLAUSTROPHOBIA*5, self.controller.all_units)
-        for u in self.nearby_units:
-            if u == self:
-                self.nearby_units.remove(self)
-        return self.nearby_units
-        
-    def receive_gather_command(self, destination):
+            
+    def receive_command(self, target, command=None, origin=(0, 0)):
         self.current_command = self._walking
-        self.current_destination = destination
-
-    def receive_move_command(self, origin, destination):
-        self.current_command = self._walking
-        self.current_destination = (destination[0] + self.x - origin[0], destination[1] + self.y - origin[1])
-        
-    def receive_unbunch_command(self):
-        self.current_command = self._unbunch
+        if command == "MOVE":
+            x = target[0] + self.x - origin[0]
+            y = target[1] + self.y - origin[1]
+            self.current_destination = (x, y)
+        else:
+            self.current_destination = target
         
     def arrive(self):
-#        if self.get_nearby_units():
-#            self.receive_unbunch_command()
-#        else:
         self.current_command = None
             
     def is_moving(self):
@@ -112,29 +105,11 @@ class BasicUnit(pyglet.sprite.Sprite):
             self.arrive()
             self.current_destination = None
             
-    def _unbunch(self, dt):
-        closest_unit_distance = 60
-        closest_unit = None
-        if self.nearby_units:
-            for d in self.nearby_units:
-                if get_distance((d.x, d.y), (self.x, self.y)) < closest_unit_distance:
-                    closest_unit = d
-                if get_distance((self.x, self.y), (d.x, d.y)) < self.CLAUSTROPHOBIA*5:
-                    if self.current_command:
-                        dx, dy = one_step_toward_destination((d.x, d.y), 
-                                                             (self.x, self.y), 
-                                                             (self.UNBUNCH_SPEED*dt))
-                        self.move(-dx, -dy)
-                        d.move(dx, dy)
-            self.get_nearby_units()
-        else:
-            self.current_command = None
-        
-
     def update(self, dt):
-        self.moved = False
         if self.current_command:
             self.current_command(dt)
+        else:
+            self.stop() #!!!
         if self.selection_indicator:
             self.selection_indicator.update(dt)
             

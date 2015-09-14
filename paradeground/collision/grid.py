@@ -65,24 +65,26 @@ class Grid(object):
             distance = tools.get_distance((x1, y1), (x2, y2))
             if distance <= unit.RADIUS + other.RADIUS:
                 flagged.update([unit, other])
-                unit.dx, unit.dy = 0, 0
-                other.dx, other.dy = 0, 0
+                unit.stop()
+                other.stop()
                 if distance < unit.RADIUS + other.RADIUS:
                     dx, dy = tools.one_step_toward_destination((other.x, other.y), 
                                      (unit.x, unit.y), 
-                                     (10./6))
+                                     (20./6))
                                      
                                      
                     unit.dx, unit.dy = -dx, -dy
                     other.dx, other.dy = dx, dy
-                    unit.arrive()
-                    other.arrive()
+                    #unit.arrive()
+                    #other.arrive()
                     adjusts.update([unit, other])
             other = other.next
         flagged.difference_update(adjusts)
         return flagged
         
     def move(self, unit, dx, dy):
+        if dx and dy:
+            print dx, dy
         x, y = unit.x + dx, unit.y + dy
         if x > settings.MAP_WIDTH:
             x = settings.MAP_WIDTH - 1
@@ -96,6 +98,7 @@ class Grid(object):
         
         unit.x = x
         unit.y = y
+        unit.rotate(dx, dy)
         
         if old_cellX == cellX and old_cellY == cellY:
             return
@@ -110,7 +113,7 @@ class Grid(object):
             self.cells[old_cellX][old_cellY] = unit.next
             
         self.add(unit)
-        unit.dx, unit.dy = 0, 0
+        unit.stop()
         
     def update(self, dt):
         self.colliding_units.clear()

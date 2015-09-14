@@ -7,13 +7,15 @@ from __init__ import BasicUnit
 from tools import transform_vertex_list, get_equilateral_vertices, get_rand_RGBs
 
 class Sparkle(BasicUnit):
+
+    SELECTION_SCALE = 1.3
+
     def __init__(self, *args, **kwargs):
         super(Sparkle, self).__init__(*args, **kwargs)
         
         self.selectable = True
         self.SIZE = 32
         self.RADIUS = self.SIZE/2
-        self.CLAUSTROPHOBIA = 5        
         self.init_graphics()
         
     def init_graphics(self):
@@ -29,4 +31,4 @@ class Sparkle(BasicUnit):
         
     def update(self, dt):
         super(Sparkle, self).update(dt)
-        self.flat_poly.colors = list(get_rand_RGBs(lower=160)) + list(get_rand_RGBs(lower=160)) + list(get_rand_RGBs(lower=160))
+        self.flat_poly.colors = list(get_rand_RGBs(lower=40)) + list(get_rand_RGBs(lower=180)) + list(get_rand_RGBs(lower=222))

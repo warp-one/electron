@@ -48,6 +48,9 @@ class UnitController(object):
                     
                 self.run_selection()
                 self.key_repeat_timer = 0
+        if button == key.S:
+            for u in self.get_selected_units():
+                u.arrive()
 
         self.last_key_pressed = button
             
@@ -167,11 +170,13 @@ class UnitController(object):
         max_y = max(whys)
         a, b = destination
         if a >= min_x and a <= max_x and b >= min_y and b <= max_y:
+            orders = "GATHER"
             for u in unit_list:
-                u.receive_gather_command(destination)
+                u.receive_command(destination, command="GATHER", origin=origin)
         else:
-            for u in unit_list:
-                u.receive_move_command(origin, destination)
+            orders = "MOVE"
+        for u in unit_list:
+            u.receive_command(destination, command=orders, origin=origin)
            
     def update(self, dt):
         cam = self.controlled_window.cam
