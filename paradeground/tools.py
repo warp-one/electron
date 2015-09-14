@@ -14,9 +14,18 @@ def transform_vertex_list(dx, dy, primitive):
 
 def get_distance(a, b):
     return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+    
+def get_distance_bt_units(unit, other):
+    a = unit.x, unit.y
+    b = other.x, other.y
+    return get_distance(a, b)
 
 def get_angle_in_radians(origin, destination):
-    return acos((origin[0]-destination[0])/get_distance(destination, origin))
+    d = get_distance(destination, origin)
+    if not d:
+        return 0
+    else:
+        return acos((origin[0]-destination[0])/get_distance(destination, origin))
     
 def get_xy_from_vector(angle, distance):
     return distance * cos(angle), distance * sin(angle)

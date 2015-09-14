@@ -14,4 +14,4 @@ class CollisionManager(object):
         self.grid = grid.Grid(self.map_width, self.map_height)
         
     def update(self, dt):
-        pass
+        self.grid.update(dt)

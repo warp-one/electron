@@ -47,8 +47,8 @@ class BasicUnit(pyglet.sprite.Sprite):
         
     def move(self, dx, dy):
         self.dx, self.dy = dx, dy
-        if self.grid.get_collision(self, dx, dy):
-            self.grid.move(self, dx, dy)
+            
+    def stop(self):
         self.dx, self.dy = 0, 0
         
     def select(self):
@@ -94,6 +94,7 @@ class BasicUnit(pyglet.sprite.Sprite):
 #            self.receive_unbunch_command()
 #        else:
         self.current_command = None
+        self.stop()
             
     def is_moving(self):
         return self.moving

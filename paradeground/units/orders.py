@@ -178,8 +178,10 @@ class UnitController(object):
     def update(self, dt):
         cam = self.controlled_window.cam
         self.wx, self.wy = cam.x, cam.y
-        self.collision_manager.update(dt)
+        self.collision_manager.update(dt) # marks colliding units
         for u in self.all_units:
+            if not u in self.collision_manager.grid.colliding_units:
+                self.collision_manager.grid.move(u, u.dx, u.dy)
             u.update(dt)
         self.key_repeat_timer += dt
         
