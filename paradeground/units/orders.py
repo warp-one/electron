@@ -51,6 +51,12 @@ class UnitController(object):
         if button == key.S:
             for u in self.get_selected_units():
                 u.arrive()
+        if button == key.DELETE:
+            to_delete = []
+            for u in self.get_selected_units():
+                if u.team == "Player":
+                    to_delete.append(u)
+            self.kill_units(to_delete)
 
         self.last_key_pressed = button
             
@@ -58,8 +64,6 @@ class UnitController(object):
     def on_mouse_press(self, x, y, buttons, modifiers):
         x += self.wx
         y += self.wy
-        if buttons & mouse.LEFT:
-            self.init_xy = (x, y)
         if buttons & mouse.LEFT:
             self.init_xy = (x, y)
 
@@ -91,22 +95,20 @@ class UnitController(object):
             else:
                 self.select_in_area()
         
-    def load_units(self, unit_list):
+    def load_units(self, unit_list, team=None):
         for u in unit_list:
             new_unit = u(self, 
                          self.collision_manager.grid,
+                         team=team,
                          img=resources.mote, x=50., y=50., 
                          batch=self.batch, 
                          group=settings.FOREGROUND)
             self.all_units.append(new_unit)
-        for u in self.all_units:
-            self.collision_manager.grid.move(u, randint(100, 1700), randint(100, 1700))
+            self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
     
     def kill_units(self, unit_list):
         for u in unit_list:
-            self.all_units.remove(u)
-            # u.spawn_death_animation()
-            u.delete()
+            u.suicide()
             
     def run_selection(self):
         for u in self.all_units:
@@ -154,11 +156,14 @@ class UnitController(object):
             else:
                 for u in in_area:
                     if not u.is_selected():
-                        self.to_select.append(u)
+                        if u.team == "Player":
+
+                            self.to_select.append(u)
         else:
             for u in in_area:
+                if u.team == "Player":
 
-                self.to_select.append(u)
+                    self.to_select.append(u)
         self.run_selection()
             
     def give_move_command(self, unit_list, origin, destination):

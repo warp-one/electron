@@ -75,16 +75,16 @@ class Grid(object):
                                      
                     unit.dx, unit.dy = -dx, -dy
                     other.dx, other.dy = dx, dy
-                    #unit.arrive()
-                    #other.arrive()
+                    unit.arrive()
+                    other.arrive()
                     adjusts.update([unit, other])
             other = other.next
         flagged.difference_update(adjusts)
         return flagged
         
     def move(self, unit, dx, dy):
-        if dx and dy:
-            print dx, dy
+        if not dx and not dy:
+            return
         x, y = unit.x + dx, unit.y + dy
         if x > settings.MAP_WIDTH:
             x = settings.MAP_WIDTH - 1
@@ -114,6 +114,18 @@ class Grid(object):
             
         self.add(unit)
         unit.stop()
+        
+    def remove(self, unit):
+        cellX = int(unit.x/self.cell_size)
+        cellY = int(unit.y/self.cell_size)
+        if unit.prev != None:
+            unit.prev.next = unit.next
+            
+        if unit.next != None:
+            unit.next.prev = unit.prev
+        
+        if self.cells[cellX][cellY] == unit:
+            self.cells[cellX][cellY] = unit.next
         
     def update(self, dt):
         self.colliding_units.clear()

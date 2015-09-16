@@ -5,13 +5,13 @@ class CommandQueue(object):
         self.active = None
     
     
-    def add(self, command):
+    def queue(self, command):
         self.queue.append(command)
         
     def clear(self):
         self.queue = []
         
-    def update(self, dt):
+    def do_action(self, dt):
         if self.active == None:
             if self.queue:  
                 self.active = self.queue.pop(0)

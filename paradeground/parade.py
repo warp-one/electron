@@ -13,11 +13,9 @@
 # Send fun pyglet tips and tricks, interesting comments, or teaching criticisms
 # to wrschuller at gmail. 
 
-## MAJOR BUGS
+## TODO // MAJOR BUGS
 #
-# When you bunch up a group of units and aggressively order them to the same
-# spot in an erratic fashion, the game will sometimes lock up. All I know so
-# far is that 
+#
 
 
 from random import choice, randint
@@ -42,7 +40,8 @@ class ParadeGround(object):
         
         # make units
         self.unit_controller = orders.UnitController(self.window)
-        self.unit_controller.load_units([tier_one.Sparkle] * 75)
+        self.unit_controller.load_units([tier_one.Sparkle] * 30, team="Player")
+        self.unit_controller.load_units([tier_one.Sparkle] * 30, team="CPU")
         self.unit_controller.collision_manager.grid.collision = True
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)

@@ -15,8 +15,10 @@ class BasicUnit(pyglet.sprite.Sprite):
     RADIUS = SIZE/2
     SPEED = 300.0 # pixels per frame
 
-    def __init__(self, controller, grid, *args, **kwargs):
+    def __init__(self, controller, grid, team=None, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
+        
+        self.team = team
         
         self.controller = controller
         # grid
@@ -87,9 +89,14 @@ class BasicUnit(pyglet.sprite.Sprite):
         
     def arrive(self):
         self.current_command = None
-            
-    def is_moving(self):
-        return self.moving
+        
+    def suicide(self):
+        self.grid.remove(self)
+        self.controller.all_units.remove(self)
+        # u.spawn_death_animation()
+        for g in self.graphics:
+            g.delete()
+        self.delete()
         
     def _walking(self, dt):
         d_from_destination = get_distance((self.x, self.y), 
