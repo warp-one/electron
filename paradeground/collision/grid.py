@@ -18,8 +18,7 @@ class Grid(object):
         self.colliding_units = set()
         
     def add(self, unit):
-        cellX = int(unit.x/self.cell_size)
-        cellY = int(unit.y/self.cell_size)
+        cellX, cellY = self.get_cell_number(unit)
 
         unit.prev = None
         unit.next = self.cells[cellX][cellY]
@@ -28,6 +27,17 @@ class Grid(object):
         if unit.next != None:
             unit.next.prev = unit
             
+    def remove(self, unit):
+        cellX, cellY = self.get_cell_number(unit)
+        
+        if unit.prev != None:
+            unit.prev.next = unit.next
+        if unit.next != None:
+            unit.next.prev = unit.prev
+        
+        if self.cells[cellX][cellY] == unit:
+            self.cells[cellX][cellY] = unit.next
+
     def get_cell_number(self, unit):
         return int(unit.x/self.cell_size), int(unit.y/self.cell_size)
             
@@ -62,8 +72,9 @@ class Grid(object):
         while other != None:
             x1, y1 = unit.x + unit.dx, unit.y + unit.dy
             x2, y2 = other.x + other.dx, other.y + other.dy
+            distance_old = tools.get_distance((unit.x, unit.y), (other.x, other.y))
             distance = tools.get_distance((x1, y1), (x2, y2))
-            if distance <= unit.RADIUS + other.RADIUS:
+            if distance <= unit.RADIUS + other.RADIUS and distance < distance_old:
                 flagged.update([unit, other])
                 unit.stop()
                 other.stop()
@@ -114,18 +125,6 @@ class Grid(object):
             
         self.add(unit)
         unit.stop()
-        
-    def remove(self, unit):
-        cellX = int(unit.x/self.cell_size)
-        cellY = int(unit.y/self.cell_size)
-        if unit.prev != None:
-            unit.prev.next = unit.next
-            
-        if unit.next != None:
-            unit.next.prev = unit.prev
-        
-        if self.cells[cellX][cellY] == unit:
-            self.cells[cellX][cellY] = unit.next
         
     def update(self, dt):
         self.colliding_units.clear()

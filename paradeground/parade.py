@@ -41,7 +41,7 @@ class ParadeGround(object):
         # make units
         self.unit_controller = orders.UnitController(self.window)
         self.unit_controller.load_units([tier_one.Sparkle] * 30, team="Player")
-        self.unit_controller.load_units([tier_one.Sparkle] * 30, team="CPU")
+#        self.unit_controller.load_units([tier_one.Sparkle] * 3, team="CPU")
         self.unit_controller.collision_manager.grid.collision = True
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)

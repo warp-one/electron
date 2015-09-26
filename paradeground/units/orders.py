@@ -12,7 +12,8 @@ number_keys = [key._1, key._2, key._3, key._4, key.Q, key.W, key.E, key.R]
 class UnitController(object):
     def __init__(self, window):
         self.batch = pyglet.graphics.Batch()
-        self.all_units = []
+        self.entities = {}
+        self.entity_id = 0
         self.init_xy = (0, 0)
         self.final_xy = (0, 0)
         self.controlled_window = window
@@ -27,10 +28,34 @@ class UnitController(object):
         for k in number_keys:
             self.control_groups.append([])
             
-        self.collision_manager = CollisionManager(self.all_units, 
+        self.collision_manager = CollisionManager(self.entities.values(), 
                                                   (settings.WINDOW_WIDTH,
                                                   settings.WINDOW_HEIGHT))
+                                       
+    def add_entity(self, entity):
+        self.entities[self.entity_id] = entity
+        entity.id = self.entity_id
+        self.entity_id += 1
+        
+    def remove_entity(self, entity):
+        del self.entities[entity.id]
+        
+    def get_entity(self, entity_id):
+        if entity_id in self.entities:
+            return self.entities[entity_id]
+        else:
+            return None
             
+    def get_unit_list(self):
+        return list(self.entities.values())
+            
+    # get rid of this        
+    def get_close_entity(self, location, e_range=100):
+        for entity in self.get_unit_list():
+            distance = tools.get_distance(location, (entity.x, entity.y))
+            if distance < e_range:
+                return entity
+        return None
         
     def on_key_press(self, button, modifiers):
         if button == self.last_key_pressed:
@@ -76,7 +101,7 @@ class UnitController(object):
     # an inefficiency here...        
     def get_selected_units(self):
         selected_units = []
-        for u in self.all_units:
+        for u in self.get_unit_list():
             if u.is_selected():
                 selected_units.append(u)
         return selected_units
@@ -87,7 +112,7 @@ class UnitController(object):
         if buttons & mouse.LEFT:
             self.final_xy = (x, y)
             if self.keys[key.LSHIFT]:
-                for u in self.all_units:
+                for u in self.get_unit_list():
                     if u.is_selected():
                         self.to_select.append(u)
             if self.final_xy == self.init_xy:
@@ -103,21 +128,22 @@ class UnitController(object):
                          img=resources.mote, x=50., y=50., 
                          batch=self.batch, 
                          group=settings.FOREGROUND)
-            self.all_units.append(new_unit)
+            self.add_entity(new_unit)
             self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
     
     def kill_units(self, unit_list):
         for u in unit_list:
+            self.remove_entity(u)
             u.suicide()
             
     def run_selection(self):
-        for u in self.all_units:
+        for u in self.get_unit_list():
             u.deselect()
         while self.to_select:
             self.to_select.pop().select()
             
     def select_from_point(self):
-        for u in self.all_units:
+        for u in self.get_unit_list():
             if tools.get_distance(self.init_xy, (u.x, u.y)) <= u.RADIUS:
                 if not u.is_selected():
                     self.to_select.append(u)
@@ -141,7 +167,7 @@ class UnitController(object):
         else:
             rect_top = y2
             rect_bot = y1
-        for u in self.all_units:
+        for u in self.get_unit_list():
             if u.x >= rect_left and u.x <= rect_right and u.y >= rect_bot and u.y <= rect_top:
                 in_area.append(u)
              
@@ -187,7 +213,7 @@ class UnitController(object):
         cam = self.controlled_window.cam
         self.wx, self.wy = cam.x, cam.y
         self.collision_manager.update(dt) # marks colliding units
-        for u in self.all_units:
+        for u in list(self.entities.values()):
             if not u in self.collision_manager.grid.colliding_units:
                 self.collision_manager.grid.move(u, u.dx, u.dy)
             u.update(dt)

@@ -14,7 +14,7 @@ class MapBorder(BasicUnit):
         super(MapBorder, self).__init__(None, None, *args, **kwargs)
         mw = settings.MAP_WIDTH
         mh = settings.MAP_HEIGHT
-        bt = 50 # border thickness
+        bt = 100 # border thickness
         Lside = (0, 0, 0, mh, bt, 0, bt, mh)
         Rside = (mw - bt, 0, mw - bt, mh, mw, 0, mw, mh)
         Tside = (bt, 0, bt, bt, mw - bt, 0, mw - bt, bt)

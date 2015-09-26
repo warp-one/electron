@@ -3,8 +3,10 @@ from math import sqrt, pi, sin, cos, tan, degrees
 import pyglet
 
 from tools import *
+from units.behavior import *
+from units.behavior import states
 from selection import selectiontriangle as st
-import settings, command
+import settings
 
 
 class BasicUnit(pyglet.sprite.Sprite):
@@ -19,8 +21,24 @@ class BasicUnit(pyglet.sprite.Sprite):
         super(BasicUnit, self).__init__(*args, **kwargs)
         
         self.team = team
+        self.name = None
+        self.id = 0
         
         self.controller = controller
+        self.brain = StateMachine()
+        self.leash_point = (0, 0)
+        self.alert_range = 200
+        self.target = None
+        
+        waiting_state = states.UnitStateWaiting(self)
+        chasing_state = states.UnitStateChasing(self)
+        command_state = states.UnitStateMoveCommand(self)
+        
+        self.brain.add_state(waiting_state)
+        self.brain.add_state(chasing_state)
+        self.brain.add_state(command_state)
+        self.brain.set_state("waiting")
+        
         # grid
         self.grid = grid
         self.prev = None
@@ -28,22 +46,20 @@ class BasicUnit(pyglet.sprite.Sprite):
         if self.grid:
             self.grid.add(self)
         
-        self.current_command = None
-        self.current_destination = None
+        self.current_destination = (0, 0)
         self.graphics = []
         self.group = settings.FOREGROUND
         self.sgroup = settings.MIDGROUND
         self.nearby_units = []
-        self.observers = []
         self.rotate_tick = .1 #1 * pi/180.
         self.rotation = 0
+        self.velocity = 0.
         self.selectable = False
         self.selected = False
         self.selection_indicator = None
         self.selection_rotation = 0  
         self.dx, self.dy = 0, 0
         self.old_x, self.old_y = 0, 0
-        self.command_set = command.CommandQueue()
         
     def move(self, dx, dy):
         self.dx, self.dy = dx, dy
@@ -79,44 +95,32 @@ class BasicUnit(pyglet.sprite.Sprite):
             return False
             
     def receive_command(self, target, command=None, origin=(0, 0)):
-        self.current_command = self._walking
         if command == "MOVE":
             x = target[0] + self.x - origin[0]
             y = target[1] + self.y - origin[1]
             self.current_destination = (x, y)
+            self.brain.set_state("movecommand")
         else:
             self.current_destination = target
+            self.brain.set_state("movecommand")
         
     def arrive(self):
-        self.current_command = None
+        self.current_destination = (0, 0)
+        self.brain.set_state("waiting")
+        self.stop()
+        self.leash_point = self.get_location()
         
     def suicide(self):
         self.grid.remove(self)
-        self.controller.all_units.remove(self)
         # u.spawn_death_animation()
         for g in self.graphics:
             g.delete()
         self.delete()
         
-    def _walking(self, dt):
-        d_from_destination = get_distance((self.x, self.y), 
-                                          (self.current_destination[0], self.current_destination[1])
-                                          )
-        if d_from_destination > 10:
-            distance_traveled = self.SPEED * dt
-            dx, dy = one_step_toward_destination(self.current_destination, 
-                                                 (self.x, self.y), 
-                                                 distance_traveled)
-            self.move(dx, dy)
-        else:
-            self.arrive()
-            self.current_destination = None
-            
     def update(self, dt):
-        if self.current_command:
-            self.current_command(dt)
-        else:
-            self.stop() #!!!
+        self.velocity = self.SPEED * dt
+        self.brain.think()
+    
         if self.selection_indicator:
             self.selection_indicator.update(dt)
             
@@ -124,6 +128,9 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.flat_poly.vertices = rotate_triangle((0, 0), self.RADIUS, self.rotation, (x, y))
         
         self.tick_selection_rotation()
+        
+    def get_location(self):
+        return self.x, self.y
 
     def tick_selection_rotation(self):
         self.selection_rotation += self.ROTATION_RATE
