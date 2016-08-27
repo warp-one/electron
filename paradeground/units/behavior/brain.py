@@ -1,8 +1,14 @@
-class State(object):
+import tools
 
+class State(object):
     def __init__(self, name):
         self.name = name
         
+    def get_distance_from_target(self):
+        return tools.get_distance((self.unit.x, self.unit.y), 
+                                  (self.unit.current_destination[0], self.unit.current_destination[1])
+                                  )
+                                  
     def do_actions(self):
         pass
         
@@ -14,9 +20,9 @@ class State(object):
         
     def exit_actions(self):
         pass
+
         
 class StateMachine(object):
-    
     def __init__(self):
         self.states = {}
         self.active_state = None

@@ -27,7 +27,7 @@ from pyglet.gl import *
 
 import tools, settings, camera
 from selection import mouseselect as ms
-from units import tier_one, orders, doodads
+from units import tier_one, orders, doodads, power_grid
 from collision import CollisionManager
 from resources import mote
 
@@ -40,8 +40,17 @@ class ParadeGround(object):
         
         # make units
         self.unit_controller = orders.UnitController(self.window)
-        self.unit_controller.load_units([tier_one.Sparkle] * 30, team="Player")
-#        self.unit_controller.load_units([tier_one.Sparkle] * 3, team="CPU")
+        self.unit_controller.load_units([tier_one.Sparkle] * 30,
+                                         team="Player",
+                                         params={'team':"PLAYER", 
+                                                 'x':randint(0, settings.MAP_WIDTH), 
+                                                 'y':randint(0, settings.MAP_HEIGHT)
+                                                 }
+                                                 )
+        self.unit_controller.load_units([tier_one.Sparkle] * 30, team="CPU")
+        grids = self.unit_controller.load_units([power_grid.PowerGrid])
+        grids[0].x, grids[0].y = 750, 800
+        grids[0].change_size(600, 200)
         self.unit_controller.collision_manager.grid.collision = True
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)

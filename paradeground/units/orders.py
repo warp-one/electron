@@ -120,16 +120,21 @@ class UnitController(object):
             else:
                 self.select_in_area()
         
-    def load_units(self, unit_list, team=None):
+    def load_units(self, unit_list, team=None, params=None):
+        loaded_units = []
         for u in unit_list:
             new_unit = u(self, 
                          self.collision_manager.grid,
                          team=team,
-                         img=resources.mote, x=50., y=50., 
+                         img=resources.mote, x=0., y=0., 
                          batch=self.batch, 
                          group=settings.FOREGROUND)
             self.add_entity(new_unit)
             self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
+            new_unit.current_destination = new_unit.get_location()
+            loaded_units.append(new_unit)
+        return loaded_units
+        
     
     def kill_units(self, unit_list):
         for u in unit_list:
@@ -144,7 +149,7 @@ class UnitController(object):
             
     def select_from_point(self):
         for u in self.get_unit_list():
-            if tools.get_distance(self.init_xy, (u.x, u.y)) <= u.RADIUS:
+            if tools.get_distance(self.init_xy, (u.x, u.y)) <= u.radius:
                 if not u.is_selected():
                     self.to_select.append(u)
                 elif self.keys[key.LSHIFT] and u.is_selected():

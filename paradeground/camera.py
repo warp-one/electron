@@ -42,9 +42,9 @@ class GameCamera(object):
             self.default()
             
     def adjust_xyz(self, dx, dy, dz):
-        max_x = settings.MAP_WIDTH - settings.WINDOW_WIDTH
+        max_x = settings.MAP_WIDTH - self.win.width
         min_x = 0
-        max_y = settings.MAP_HEIGHT - settings.WINDOW_HEIGHT
+        max_y = settings.MAP_HEIGHT - self.win.height
         min_y = 0
         new_x = self.x + dx
         new_y = self.y + dy
@@ -108,10 +108,10 @@ class GameCamera(object):
             self.mode = 3
             self.perspective()
         elif self.mode == 3 and symbol == key.NUM_SUBTRACT:
-            self.fov -= 1
+            self.fov -= 10
             self.perspective()
         elif self.mode == 3 and symbol == key.NUM_ADD:
-            self.fov += 1
+            self.fov += 10
             self.perspective()
             
         else: print "KEY " + key.symbol_string(symbol)
@@ -120,13 +120,14 @@ class GameCamera(object):
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         """ Mouse drag event handler.
         """
-        if button == 1:
-            self.adjust_xyz(-dx*2, -dy*2, 0)
-        elif button == 2:
-            self.adjust_xyz(-dx*2, 0, -dz*2)
-        elif button == 4:
-            self.ry += dx/4.
-            self.rx -= dy/4.
+        if modifiers & key.MOD_CTRL:
+            if button == 1:
+                self.adjust_xyz(-dx*2, -dy*2, 0)
+            elif button == 2:
+                self.adjust_xyz(-dx*2, 0, -dz*2)
+            elif button == 4:
+                self.ry += dx/4.
+                self.rx -= dy/4.
             
     def on_mouse_motion(x, y, dx, dy):
         pass
@@ -165,7 +166,7 @@ class CameraWindow(pyglet.window.Window):
         self.cam = GameCamera(self)
         self.on_resize = self.cam.view
         self.on_key_press = self.cam.key
-        #self.on_mouse_drag = self.cam.on_mouse_drag
+        self.on_mouse_drag = self.cam.on_mouse_drag
         
         self.mouse_selector = ms.MouseSelector(self.cam)
         self.push_handlers(self.mouse_selector)

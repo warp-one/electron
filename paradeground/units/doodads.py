@@ -28,3 +28,6 @@ class MapBorder(BasicUnit):
                                              ('v2f/static', vertices),
                                              ('c3B/static', tuple([50]*48))
                                              )
+
+class Obstacle(BasicUnit):
+    pass

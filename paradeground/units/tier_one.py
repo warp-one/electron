@@ -3,31 +3,34 @@ from math import sqrt
 
 import pyglet
 
-from __init__ import BasicUnit
+from __init__ import ThinkingUnit, Speed, Circle
 from tools import transform_vertex_list, get_equilateral_vertices, get_rand_RGBs
 import settings
 
-class Sparkle(BasicUnit):
+class Sparkle(ThinkingUnit, Circle):
 
-    SELECTION_SCALE = 1.3
+    selection_scale = 1.3
+    size = 32
+    radius = 16
+    BASE_SPEED = 150.
 
     def __init__(self, *args, **kwargs):
         super(Sparkle, self).__init__(*args, **kwargs)
         
         self.selectable = True
-        self.SIZE = 32
-        self.RADIUS = self.SIZE/2
         self.init_graphics()
         self.color = [200, 200, 200]
-        
-    def init_graphics(self):
         if self.team:
             if self.team == "Player":
                 self.color = settings.PLAYER_COLOR
             elif self.team == "CPU":
                 self.color = settings.CPU1_COLOR
+        
+        self.statuses[Speed.name] = Speed(self)
+        
+    def init_graphics(self):
         x, y = self.x, self.y
-        poly_vertices = get_equilateral_vertices((x, y), self.SIZE/3)
+        poly_vertices = get_equilateral_vertices((x, y), self.size/3)
         self.flat_poly = self.batch.add(3, pyglet.gl.GL_TRIANGLES, self.group,
                                         ('v2f/stream', poly_vertices),
                                         ('c3B', (50, 50, 255, 50, 50, 255,
