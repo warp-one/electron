@@ -37,7 +37,6 @@ class Grid(object):
         self.colliding_units = set()
         
     def add(self, unit):
-#        cellX, cellY = self.get_cell_number(unit)
         for c in self.get_cell_numbers(unit):
             cellX, cellY = c
             unit.prev = None
@@ -48,7 +47,6 @@ class Grid(object):
                 unit.next.prev = unit
             
     def remove(self, unit):
-#        cellX, cellY = self.get_cell_number(unit)
         for c in self.get_cell_numbers(unit):
             cellX, cellY = c
         
@@ -77,7 +75,8 @@ class Grid(object):
         return units_in_cell
         
     def handle_cell(self, cellX, cellY):
-        # change to only walk over cells where a unit moved
+        # IF YOU change to only walk over cells where a unit moved
+        # it will break zones
         unit = self.cells[cellX][cellY]
         flagged_units = set()
         while unit != None:
@@ -98,11 +97,6 @@ class Grid(object):
         flagged = set()
         adjusts = set()
         while other != None:
-#            x1, y1 = unit.x + unit.dx, unit.y + unit.dy
-#            x2, y2 = other.x + other.dx, other.y + other.dy
-#            distance_old = tools.get_distance((unit.x, unit.y), (other.x, other.y))
-#            distance = tools.get_distance((x1, y1), (x2, y2))
-#            if distance <= unit.radius + other.radius:# and distance < distance_old:
             proximity = collides(unit, other)
             if proximity:
                 if unit.handle_collision(other) and other.handle_collision(unit):
@@ -118,8 +112,6 @@ class Grid(object):
                                              
                             self.move(unit, -dx, -dy)
                             self.move(other, dx, dy)
-                            #unit.dx, unit.dy = -dx, -dy
-                            #other.dx, other.dy = dx, dy
                             unit.brain.set_state("waiting")
                             other.brain.set_state("waiting")
                             adjusts.update([unit, other])

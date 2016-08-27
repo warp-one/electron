@@ -32,16 +32,17 @@ class Speed(Status):
         super(Speed, self).__init__(unit)
         self.max_speed = max_speed
         self.acceleration = acceleration
+        self.zones = set()
         
-    def trigger(self):
-        self.active = True
+    def trigger(self, zone):
+        self.zones.add(zone)
         
-    def deactivate(self):
-        self.active = False
+    def deactivate(self, zone):
+        self.zones.discard(zone)
         
     def update(self, dt):
         speed_normal = (self.unit.current_speed - self.unit.BASE_SPEED)/(self.max_speed - self.unit.BASE_SPEED)
-        if self.active:
+        if self.zones:
             if self.unit.current_speed < self.max_speed:
                 self.unit.current_speed += min(self.acceleration, self.max_speed - self.unit.current_speed)
             if not randint(0, 270):
@@ -55,67 +56,6 @@ class Speed(Status):
                 self.unit.flat_poly.colors = [int(self.unit.color[i%3]*.69) for i, x in enumerate(self.unit.flat_poly.colors)]
                 
 
-class Shape(object):
-    shape = "oolou"
-
-    @property
-    def left(self):
-        return self.x - self.w/2
-    @property
-    def right(self):
-        return self.x + self.w/2
-    @property
-    def top(self):
-        return self.y + self.h/2
-    @property
-    def bottom(self):
-        return self.y - self.h/2
-    @property
-    def radius(self):
-        return (self.w/2 if self.w > self.h else self.h/2)
-        
-    @property
-    def corners(self):
-        return self.x, self.y
-                
-class Rectangle(Shape):
-
-    shape = "rectangle"
-
-    @property
-    def left(self):
-        return self.x - self.w/2
-    @property
-    def right(self):
-        return self.x + self.w/2
-    @property
-    def top(self):
-        return self.y + self.h/2
-    @property
-    def bottom(self):
-        return self.y - self.h/2
-    @property
-    def radius(self):
-        return (self.w/2 if self.w > self.h else self.h/2)
-    @property
-    def corners(self):
-        return self.left, self.right, self.top, self.bottom
-        
-class Circle(object):
-    shape = "circle"
-
-    @property
-    def left(self):
-        return self.x - self.radius
-    @property
-    def right(self):
-        return self.x + self.radius
-    @property
-    def top(self):
-        return self.y + self.radius
-    @property
-    def bottom(self):
-        return self.y - self.radius
 
             
 class BasicUnit(pyglet.sprite.Sprite):

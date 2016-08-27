@@ -40,17 +40,19 @@ class ParadeGround(object):
         
         # make units
         self.unit_controller = orders.UnitController(self.window)
-        self.unit_controller.load_units([tier_one.Sparkle] * 30,
+        self.unit_controller.load_units([tier_one.Sparkle] * 40,
                                          team="Player",
                                          params={'team':"PLAYER", 
                                                  'x':randint(0, settings.MAP_WIDTH), 
                                                  'y':randint(0, settings.MAP_HEIGHT)
                                                  }
                                                  )
-        self.unit_controller.load_units([tier_one.Sparkle] * 30, team="CPU")
-        grids = self.unit_controller.load_units([power_grid.PowerGrid])
+        self.unit_controller.load_units([tier_one.Sparkle] * 5, team="CPU")
+        grids = self.unit_controller.load_units([power_grid.PowerGrid]*3)
         grids[0].x, grids[0].y = 750, 800
-        grids[0].change_size(600, 200)
+        grids[0].change_size(600, 200, strand_frequency=20)
+        grids[1].x, grids[1].y = 950, 400
+        grids[1].change_size(800, 250)
         self.unit_controller.collision_manager.grid.collision = True
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)

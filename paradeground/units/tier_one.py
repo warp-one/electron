@@ -3,7 +3,8 @@ from math import sqrt
 
 import pyglet
 
-from __init__ import ThinkingUnit, Speed, Circle
+from __init__ import ThinkingUnit, Speed
+from shape import Circle
 from tools import transform_vertex_list, get_equilateral_vertices, get_rand_RGBs
 import settings
 
@@ -11,7 +12,7 @@ class Sparkle(ThinkingUnit, Circle):
 
     selection_scale = 1.3
     size = 32
-    radius = 16
+    radius = 12
     BASE_SPEED = 150.
 
     def __init__(self, *args, **kwargs):
