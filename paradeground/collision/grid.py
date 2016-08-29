@@ -18,22 +18,28 @@ def collides(unit, other):
                 return True
         else:
             return False
+    if unit.shape == "circle" and other.shape == "rectangle":
+        if unit.x > other.left and unit.x < other.right:
+            if unit.y > other.bottom and unit.y < other.top:
+                return True
+        else:
+            return False
         
 
 
 class Grid(object):
 
-    cell_size = 1500
+    cell_size = 2000
 
     def __init__(self, map_width, map_height):
         self.cells = []
         self.map_width = map_width
         self.map_height = map_height
-        mapX = int(map_width/self.cell_size)
-        mapY = int(map_height/self.cell_size)
-        for c in range(mapX):
+        self.mapX = int(map_width/self.cell_size)
+        self.mapY = int(map_height/self.cell_size)
+        for c in range(self.mapX):
             self.cells.append([])
-            for r in range(mapY):
+            for r in range(self.mapY):
                 self.cells[c].append(None)
         self.collision = False
         self.colliding_units = set()
@@ -61,13 +67,16 @@ class Grid(object):
                 self.cells[cellX][cellY] = unit.next
 
     def get_cell_numbers(self, unit):
-        cells = []
-        if self.cell_size < unit.radius:
-            grid_points = unit.get_grid_points(self.cell_size)
-            for c in grid_points:
-                cells.append((int(c[0]/self.cell_size), int(c[1]/self.cell_size)))
-        else:
-            cells.append((int(unit.x/self.cell_size), int(unit.y/self.cell_size)))
+        cells = set()
+        cells.add((int(unit.x/self.cell_size), int(unit.y/self.cell_size)))
+#        if self.cell_size < unit.radius:
+        grid_points = unit.get_grid_points(self.cell_size)
+        for c in grid_points:
+            if c[0] > self.mapX or c[1] > self.mapY:
+                continue
+            cells.add((int(c[0]/self.cell_size), int(c[1]/self.cell_size)))
+#        else:
+#            cells.append((int(unit.x/self.cell_size), int(unit.y/self.cell_size)))
         return cells
             
     def get_units_in_cell(self, head):
@@ -90,16 +99,16 @@ class Grid(object):
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX-1][cellY]))
             if cellY > 0:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX][cellY-1]))
-            if cellX > 0 and cellY < len(self.cells[0]) - 1:
+            if cellX > 0 and cellY < self.mapY - 1:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX-1][cellY+1]))
                 #########
-            if cellX < self.map_width/self.cell_size and cellY < self.map_height/self.cell_size:
+            if cellX < self.mapX - 1 and cellY < self.mapY - 1:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY+1]))
-            if cellX < self.map_width/self.cell_size:
+            if cellX < self.mapX - 1:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY]))
-            if cellY < self.map_height/self.cell_size:
+            if cellY < self.mapY - 1:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX][cellY+1]))
-            if cellX < self.map_width/self.cell_size and cellY > 0:
+            if cellX < self.mapX - 1 and cellY > 0:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY-1]))
                 
 
@@ -130,8 +139,7 @@ class Grid(object):
                             adjusts.update([unit, other])
 
             else:
-                unit.not_collide(other)
-                other.not_collide(unit)
+                pass
             other = other.next
         flagged.difference_update(adjusts)
         return flagged
@@ -186,9 +194,4 @@ class Grid(object):
                 if u:
                     cells = self.get_cell_numbers(u)
                     for c in cells:
-                        try:
-                            self.colliding_units.update(self.handle_cell(c[0], c[1]))
-                        except IndexError:
-                            print "Unit out of bounds!"
-           
-                    
+                        self.colliding_units.update(self.handle_cell(c[0], c[1]))

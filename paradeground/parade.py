@@ -85,7 +85,6 @@ class ParadeGround(object):
         self.window.clear()
         self.window.mouse_selector.batch.draw()
         self.window.cam.apply()
-        self.unit_controller.batch.draw()
         if settings.ANTI_ALIASING:
             pyglet.gl.glColor4f(1.0, 0, 0, 1.0)
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)                             
@@ -96,6 +95,7 @@ class ParadeGround(object):
             glEnable (GL_POLYGON_SMOOTH);                                                     
             glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE)                                     
             glLineWidth (1)                                                                
+        self.unit_controller.batch.draw()
         self.batch.draw()
         
 if __name__ == '__main__':

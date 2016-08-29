@@ -22,7 +22,7 @@ class Shape(object):
         return self.x, self.y
         
     def get_grid_points(self, grid_cell_size):
-        return self.x, self.y
+        return [(self.x, self.y)]
                 
 class Rectangle(Shape):
 
@@ -48,18 +48,18 @@ class Rectangle(Shape):
         return self.left, self.right, self.top, self.bottom
         
     def get_grid_points(self, grid_cell_size):
-        points = [self.x, self.y]
-        points.extend([self.left, self.top, self.left, self.bottom,
-                       self.right, self.top, self.right, self.bottom])
+        points = [(self.x, self.y)]
+        points.extend([(self.left, self.top), (self.left, self.bottom),
+                       (self.right, self.top), (self.right, self.bottom)])
         if grid_cell_size < .5*self.w:
             for x in range(self.w/grid_cell_size):
-                points.extend([self.left + x*grid_cell_size, self.top])
-                points.extend([self.left + x*grid_cell_size, self.bottom])
+                points.append((self.left + x*grid_cell_size, self.top))
+                points.append((self.left + x*grid_cell_size, self.bottom))
         if grid_cell_size < .5*self.h:
             for y in range(self.h/grid_cell_size):
             
-                points.extend([self.left, self.bottom + y*grid_cell_size])
-                points.extend([self.right, self.bottom + y*grid_cell_size])
+                points.append((self.left, self.bottom + y*grid_cell_size))
+                points.append((self.right, self.bottom + y*grid_cell_size))
         return points
 
         

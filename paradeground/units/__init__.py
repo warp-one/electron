@@ -38,7 +38,8 @@ class Speed(Status):
         self.zones.add(zone)
         
     def deactivate(self, zone):
-        self.zones.discard(zone)
+        return
+        #self.zones.discard(zone)
         
     def update(self, dt):
         speed_normal = (self.unit.current_speed - self.unit.BASE_SPEED)/(self.max_speed - self.unit.BASE_SPEED)
@@ -55,7 +56,7 @@ class Speed(Status):
                 self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else int(self.unit.color[i%3]*.83) for i, x in enumerate(self.unit.flat_poly.colors)]
             else:
                 self.unit.flat_poly.colors = [int(self.unit.color[i%3]*.69) for i, x in enumerate(self.unit.flat_poly.colors)]
-                
+        self.zones.clear()
 
 
             
@@ -155,8 +156,6 @@ class BasicUnit(pyglet.sprite.Sprite):
     def handle_collision(self, collider):
         return self.solid
         
-    def not_collide(self, other):
-        pass
         
 
 class ActiveUnit(BasicUnit):

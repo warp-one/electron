@@ -1,4 +1,5 @@
 from random import randint
+from itertools import chain
 
 import pyglet
 
@@ -33,6 +34,7 @@ class PowerGrid(ThinkingUnit, Rectangle):
         self.w, self.h = 300, 400
         self.init_graphics(strand_frequency=20)
         self.selectable = False
+        self.points = []
         
     def calculate_colors_and_vertices(self, strand_frequency):
         self.num_strands = (self.w if self.w < self.h else self.h)/strand_frequency
@@ -70,6 +72,15 @@ class PowerGrid(ThinkingUnit, Rectangle):
         self.init_graphics(strand_frequency)
         
     def update(self, dt):
+        if not self.points:
+            pts = self.get_grid_points(2000)
+            lenpts = len(pts)
+        
+            self.points = self.batch.add(lenpts, pyglet.gl.GL_POINTS, settings.FOREGROUND,
+                                        ('v2f/stream', tuple(chain(*pts))),
+                                        ('c3B', tuple([255]*3*lenpts))
+                                        )
+
         
         for s in self.statuses:
             self.statuses[s].update(dt)
@@ -95,13 +106,6 @@ class PowerGrid(ThinkingUnit, Rectangle):
                 
         self.strands.colors = tuple([randint(0, 255) for _ in range(len(self.strand_vertices)*3/2)])
         #self.flat_poly.colors = list(get_rand_RGBs(lower=40)) + list(get_rand_RGBs(lower=180)) + list(get_rand_RGBs(lower=222))
-
-    def not_collide(self, other):
-        if other.solid:
-            try:
-                other.statuses["Speed"].deactivate(self)
-            except KeyError:
-                print "Can't slow this unit down!"
         
     def handle_collision(self, collider):
         if collider.solid:
