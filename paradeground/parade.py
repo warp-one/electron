@@ -49,10 +49,13 @@ class ParadeGround(object):
                                                  )
         self.unit_controller.load_units([tier_one.Sparkle] * 5, team="CPU")
         grids = self.unit_controller.load_units([power_grid.PowerGrid]*3)
+#        walls = self.unit_controller.load_units([tier_one.Wall]*3)
+#        for wall in walls:
+#            wall.move(randint(-25, 25), randint(-25, 25))
         grids[0].x, grids[0].y = 750, 800
-        grids[0].change_size(600, 200, strand_frequency=20)
-        grids[1].x, grids[1].y = 950, 400
-        grids[1].change_size(800, 250)
+        grids[0].change_size(1200, 300, strand_frequency=20)
+        grids[1].x, grids[1].y = 750, 600
+        grids[1].change_size(250, 700)
         self.unit_controller.collision_manager.grid.collision = True
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)
@@ -82,6 +85,7 @@ class ParadeGround(object):
         self.window.clear()
         self.window.mouse_selector.batch.draw()
         self.window.cam.apply()
+        self.unit_controller.batch.draw()
         if settings.ANTI_ALIASING:
             pyglet.gl.glColor4f(1.0, 0, 0, 1.0)
             glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)                             
@@ -93,7 +97,6 @@ class ParadeGround(object):
             glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE)                                     
             glLineWidth (1)                                                                
         self.batch.draw()
-        self.unit_controller.batch.draw()
         
 if __name__ == '__main__':
     game = ParadeGround()

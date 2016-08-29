@@ -7,7 +7,7 @@
 import settings, grid
 
 class CollisionManager(object):
-    def __init__(self, unit_list, game_size):
+    def __init__(self, unit_list):
         self.all_units = unit_list
         self.map_width = settings.MAP_WIDTH
         self.map_height = settings.MAP_HEIGHT

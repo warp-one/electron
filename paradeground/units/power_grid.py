@@ -35,11 +35,17 @@ class PowerGrid(ThinkingUnit, Rectangle):
         self.selectable = False
         
     def calculate_colors_and_vertices(self, strand_frequency):
-        self.num_strands = self.w/strand_frequency
-        box_top = self.x - self.w/2, self.y + self.h/2
-        box_bot = self.x - self.w/2, self.y - self.h/2
-        bot_vertices = [(box_bot[0] + strand_frequency*x, box_bot[1]) for x in range(self.num_strands)]
-        top_vertices = [(box_top[0] + strand_frequency*x, box_top[1]) for x in range(self.num_strands)]
+        self.num_strands = (self.w if self.w < self.h else self.h)/strand_frequency
+        box_top_left = self.x - self.w/2, self.y + self.h/2
+        box_bot_right = self.x + self.w/2, self.y - self.h/2
+        if self.w < self.h:
+            bot_vertices = [(box_bot_right[0] - strand_frequency*x, box_bot_right[1]) for x in range(self.num_strands)]
+            top_vertices = [(box_top_left[0] + strand_frequency*x, box_top_left[1]) for x in range(self.num_strands)]
+            top_vertices = top_vertices[::-1]
+        else:
+            bot_vertices = [(box_bot_right[0], box_bot_right[1] + strand_frequency*x) for x in range(self.num_strands)]
+            top_vertices = [(box_top_left[0], box_top_left[1] - strand_frequency*x) for x in range(self.num_strands)]
+            top_vertices = top_vertices[::-1]
         strand_vertices = []
         while bot_vertices or top_vertices:
             bv = bot_vertices.pop()
@@ -71,12 +77,19 @@ class PowerGrid(ThinkingUnit, Rectangle):
             if self.x != self.old_x or self.y != self.old_y:
                 self.old_x, self.old_y = self.x, self.y
                 self.change_size(self.w, self.h)
+            if self.w < self.h:
 
-            if not i%2:
-                x = self.strands.vertices[i] + randint(-1, 1)
-                if (x > self.x - self.w/2) and (x < self.x + self.w/2):
-                                
-                    self.strands.vertices[i] = x
+                if not i%2:
+                    x = self.strands.vertices[i] + randint(-1, 1)
+                    if (x > self.x - self.w/2) and (x < self.x + self.w/2):
+                                    
+                        self.strands.vertices[i] = x
+            else:
+                if i%2:
+                    x = self.strands.vertices[i] + randint(-1, 1)
+                    if (x > self.y - self.h/2) and (x < self.y + self.h/2):
+                                    
+                        self.strands.vertices[i] = x
                     
 
                 
@@ -85,9 +98,15 @@ class PowerGrid(ThinkingUnit, Rectangle):
 
     def not_collide(self, other):
         if other.solid:
-            other.statuses["Speed"].deactivate(self)
+            try:
+                other.statuses["Speed"].deactivate(self)
+            except KeyError:
+                print "Can't slow this unit down!"
         
     def handle_collision(self, collider):
         if collider.solid:
-            collider.statuses["Speed"].trigger(self)
+            try:
+                collider.statuses["Speed"].trigger(self)
+            except KeyError:
+                print "Can't speed this unit up!"
         return False

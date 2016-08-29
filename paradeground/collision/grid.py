@@ -23,10 +23,12 @@ def collides(unit, other):
 
 class Grid(object):
 
-    cell_size = 2000
+    cell_size = 1500
 
     def __init__(self, map_width, map_height):
         self.cells = []
+        self.map_width = map_width
+        self.map_height = map_height
         mapX = int(map_width/self.cell_size)
         mapY = int(map_height/self.cell_size)
         for c in range(mapX):
@@ -61,10 +63,11 @@ class Grid(object):
     def get_cell_numbers(self, unit):
         cells = []
         if self.cell_size < unit.radius:
-            for x in range(unit.corners):
-                c = unit.corners[x]
+            grid_points = unit.get_grid_points(self.cell_size)
+            for c in grid_points:
                 cells.append((int(c[0]/self.cell_size), int(c[1]/self.cell_size)))
-        cells.append((int(unit.x/self.cell_size), int(unit.y/self.cell_size)))
+        else:
+            cells.append((int(unit.x/self.cell_size), int(unit.y/self.cell_size)))
         return cells
             
     def get_units_in_cell(self, head):
@@ -89,6 +92,16 @@ class Grid(object):
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX][cellY-1]))
             if cellX > 0 and cellY < len(self.cells[0]) - 1:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX-1][cellY+1]))
+                #########
+            if cellX < self.map_width/self.cell_size and cellY < self.map_height/self.cell_size:
+                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY+1]))
+            if cellX < self.map_width/self.cell_size:
+                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY]))
+            if cellY < self.map_height/self.cell_size:
+                flagged_units.update(self.handle_unit(unit, self.cells[cellX][cellY+1]))
+            if cellX < self.map_width/self.cell_size and cellY > 0:
+                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY-1]))
+                
 
             unit = unit.next
         return flagged_units
@@ -115,6 +128,7 @@ class Grid(object):
                             unit.brain.set_state("waiting")
                             other.brain.set_state("waiting")
                             adjusts.update([unit, other])
+
             else:
                 unit.not_collide(other)
                 other.not_collide(unit)
@@ -152,11 +166,17 @@ class Grid(object):
             
         if unit.next != None:
             unit.next.prev = unit.prev
+        
+        try:
+            if self.cells[old_cellX][old_cellY] == unit:
+                self.cells[old_cellX][old_cellY] = unit.next
+        except IndexError:
+            print unit, old_cellX, old_cellY
             
-        if self.cells[old_cellX][old_cellY] == unit:
-            self.cells[old_cellX][old_cellY] = unit.next
-            
-        self.add(unit)
+        try:
+            self.add(unit)
+        except IndexError:
+            print unit
         unit.stop()
         
     def update(self, dt):
@@ -170,4 +190,5 @@ class Grid(object):
                             self.colliding_units.update(self.handle_cell(c[0], c[1]))
                         except IndexError:
                             print "Unit out of bounds!"
+           
                     

@@ -45,13 +45,14 @@ class Speed(Status):
         if self.zones:
             if self.unit.current_speed < self.max_speed:
                 self.unit.current_speed += min(self.acceleration, self.max_speed - self.unit.current_speed)
-            if not randint(0, 270):
-                self.unit.flat_poly.colors = [255 for x in self.unit.flat_poly.colors]
+            #if not randint(0, 270):
+            #    self.unit.flat_poly.colors = [255 for x in self.unit.flat_poly.colors]
             self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else self.unit.color[i%3] for i, x in enumerate(self.unit.flat_poly.colors)]
 
         else:
             if self.unit.current_speed > self.unit.BASE_SPEED:
                 self.unit.current_speed -= min(self.acceleration, self.unit.current_speed - self.unit.BASE_SPEED)
+                self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else int(self.unit.color[i%3]*.83) for i, x in enumerate(self.unit.flat_poly.colors)]
             else:
                 self.unit.flat_poly.colors = [int(self.unit.color[i%3]*.69) for i, x in enumerate(self.unit.flat_poly.colors)]
                 
@@ -64,6 +65,8 @@ class BasicUnit(pyglet.sprite.Sprite):
     selection_scale = 2
     size = 32
     radius = size/2
+    w = size
+    h = size
     BASE_SPEED = 300.0 # pixels per frame
     solid = True
     shape = "circle"
@@ -97,6 +100,8 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.current_speed = self.BASE_SPEED
         
         self.statuses = {}
+
+
         
     def select(self):
         if self.selectable and not self.is_selected():

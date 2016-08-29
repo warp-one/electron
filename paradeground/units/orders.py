@@ -28,9 +28,7 @@ class UnitController(object):
         for k in number_keys:
             self.control_groups.append([])
             
-        self.collision_manager = CollisionManager(self.entities.values(), 
-                                                  (settings.WINDOW_WIDTH,
-                                                  settings.WINDOW_HEIGHT))
+        self.collision_manager = CollisionManager(self.entities.values())
                                        
     def add_entity(self, entity):
         self.entities[self.entity_id] = entity
@@ -130,6 +128,7 @@ class UnitController(object):
                          batch=self.batch, 
                          group=settings.FOREGROUND)
             self.add_entity(new_unit)
+            # the line below is only doing the team units?
             self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
             new_unit.current_destination = new_unit.get_location()
             loaded_units.append(new_unit)
