@@ -16,11 +16,7 @@ class Shape(object):
     @property
     def radius(self):
         return (self.w/2 if self.w > self.h else self.h/2)
-        
-    @property
-    def corners(self):
-        return self.x, self.y
-        
+                
     def get_grid_points(self, grid_cell_size):
         return [(self.x, self.y)]
                 
@@ -43,9 +39,6 @@ class Rectangle(Shape):
     @property
     def radius(self):
         return (self.w/2 if self.w > self.h else self.h/2)
-    @property
-    def corners(self):
-        return self.left, self.right, self.top, self.bottom
         
     def get_grid_points(self, grid_cell_size):
         points = [(self.x, self.y)]

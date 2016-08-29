@@ -102,14 +102,14 @@ class Grid(object):
             if cellX > 0 and cellY < self.mapY - 1:
                 flagged_units.update(self.handle_unit(unit, self.cells[cellX-1][cellY+1]))
                 #########
-            if cellX < self.mapX - 1 and cellY < self.mapY - 1:
-                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY+1]))
-            if cellX < self.mapX - 1:
-                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY]))
-            if cellY < self.mapY - 1:
-                flagged_units.update(self.handle_unit(unit, self.cells[cellX][cellY+1]))
-            if cellX < self.mapX - 1 and cellY > 0:
-                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY-1]))
+#            if cellX < self.mapX - 1 and cellY < self.mapY - 1:
+#                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY+1]))
+#            if cellX < self.mapX - 1:
+#                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY]))
+#            if cellY < self.mapY - 1:
+#                flagged_units.update(self.handle_unit(unit, self.cells[cellX][cellY+1]))
+#            if cellX < self.mapX - 1 and cellY > 0:
+#                flagged_units.update(self.handle_unit(unit, self.cells[cellX+1][cellY-1]))
                 
 
             unit = unit.next
@@ -121,7 +121,9 @@ class Grid(object):
         while other != None:
             proximity = collides(unit, other)
             if proximity:
-                if unit.handle_collision(other) and other.handle_collision(unit):
+                unit_collided = unit.handle_collision(other)
+                other_collided = other.handle_collision(unit)
+                if unit_collided and other_collided:
                     flagged.update([unit, other])
                     
 
