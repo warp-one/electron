@@ -10,10 +10,10 @@ import settings
 
 class Sparkle(ThinkingUnit, Circle):
 
-    selection_scale = 1.3
     size = 24
     radius = size/2
     image_factor = 1.4
+    selection_scale = 1.3 * image_factor
     BASE_SPEED = 150.
 
     def __init__(self, *args, **kwargs):

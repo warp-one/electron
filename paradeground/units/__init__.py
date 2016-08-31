@@ -63,7 +63,6 @@ class Speed(Status):
 class BasicUnit(pyglet.sprite.Sprite):
 
     ROTATION_RATE = 1 * pi/180 # radians = degrees * pi/180
-    selection_scale = 2
     size = 32
     radius = size/2
     w = size
@@ -72,6 +71,7 @@ class BasicUnit(pyglet.sprite.Sprite):
     solid = True
     shape = "circle"
     image_factor = 1
+    selection_scale = 2 * image_factor
 
     def __init__(self, controller, grid, team=None, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)

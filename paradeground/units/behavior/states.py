@@ -40,7 +40,8 @@ class UnitStateChasing(State):
         ranging_distance = tools.get_distance(self.unit.leash_point, self.unit.get_location())
         if ranging_distance > self.unit.alert_range:
             print "too far!"
-            return "idleing"
+            self.unit.current_destination = self.unit.leash_point
+            return "movecommand"
         hostile_unit = self.unit.controller.get_close_entity(self.unit.get_location())
         if not hostile_unit:
             self.unit.target = None
@@ -52,7 +53,7 @@ class UnitStateChasing(State):
     def entry_actions(self):
         print "now chasing"
         self.unit.leash_point = self.unit.get_location()
-#        self.unit.receive_command(self.unit.target.get_location(), "MOVE")
+        self.unit.receive_command(self.unit.target.get_location(), "MOVE")
 
         
 class UnitStateWaiting(State):
@@ -66,6 +67,8 @@ class UnitStateWaiting(State):
         self.idle_time += 1
 
     def check_conditions(self):
+        if tools.get_distance(self.unit.current_destination, self.unit.get_location()) < self.unit.radius*4:
+            return "idleing"
         if self.idle_time >= self.waiting_period:
             print "trying again"
             return "movecommand"
@@ -76,7 +79,7 @@ class UnitStateWaiting(State):
         self.unit.wait_count += 1
         self.unit.dx, self.unit.dy = 0, 0
         self.idle_time = 0
-        print "waiting... for the " + str(self.unit.wait_time) + "th time"
+        print "waiting... for the " + str(self.unit.wait_count) + "th time"
 
         
 class UnitStateMoveCommand(State):

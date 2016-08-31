@@ -26,6 +26,6 @@ class SelectionTriangle(object):
         ss = self.parent.selection_scale
         current_location = self.parent.x, self.parent.y
         self.graphic.vertices = tools.rotate_triangle((0, 0), 
-                                  self.parent.image_factor*self.parent.radius * ss,
+                                  self.parent.radius*ss,
                                   sr,
                                   current_location)
