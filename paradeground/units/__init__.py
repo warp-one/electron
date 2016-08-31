@@ -52,7 +52,7 @@ class Speed(Status):
 
         else:
             if self.unit.current_speed > self.unit.BASE_SPEED:
-                self.unit.current_speed -= min(self.acceleration, self.unit.current_speed - self.unit.BASE_SPEED)
+                self.unit.current_speed -= min(self.acceleration/4, self.unit.current_speed - self.unit.BASE_SPEED)
                 self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else int(self.unit.color[i%3]*.83) for i, x in enumerate(self.unit.flat_poly.colors)]
             else:
                 self.unit.flat_poly.colors = [int(self.unit.color[i%3]*.69) for i, x in enumerate(self.unit.flat_poly.colors)]
@@ -71,6 +71,7 @@ class BasicUnit(pyglet.sprite.Sprite):
     BASE_SPEED = 300.0 # pixels per frame
     solid = True
     shape = "circle"
+    image_factor = 1
 
     def __init__(self, controller, grid, team=None, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
@@ -140,7 +141,7 @@ class BasicUnit(pyglet.sprite.Sprite):
             self.selection_indicator.update(dt)
             
         x, y = self.x, self.y
-        self.flat_poly.vertices = rotate_triangle((0, 0), self.radius, self.rotation, (x, y))
+        self.flat_poly.vertices = rotate_triangle((0, 0), self.radius*self.image_factor, self.rotation, (x, y))
         
         self.tick_selection_rotation()
         

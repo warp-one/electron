@@ -13,9 +13,11 @@
 # Send fun pyglet tips and tricks, interesting comments, or teaching criticisms
 # to wrschuller at gmail. 
 
-## TODO // MAJOR BUGS
+## IDEAS
 #
-#
+# charge seeking negation as a joyous exercise
+# glitter glued onto construction paper
+# 
 
 
 from random import choice, randint

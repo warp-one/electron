@@ -3,7 +3,7 @@ from itertools import chain
 
 import pyglet
 
-from __init__ import ThinkingUnit
+from __init__ import BasicUnit, ThinkingUnit
 from shape import Rectangle
 import settings
 
@@ -35,6 +35,11 @@ class PowerGrid(ThinkingUnit, Rectangle):
         self.init_graphics(strand_frequency=20)
         self.selectable = False
         self.points = []
+        
+    def create_grid_nodes(self, cell_size):
+        for p in self.get_grid_points(cell_size):
+            yield BasicUnit
+        
         
     def calculate_colors_and_vertices(self, strand_frequency):
         self.num_strands = (self.w if self.w < self.h else self.h)/strand_frequency
