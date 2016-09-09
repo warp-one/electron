@@ -27,6 +27,8 @@ class PowerGrid(ThinkingUnit, Rectangle):
 
     solid = False
     shape = "rectangle"
+    top_speed = 600.0
+    acceleration = 20.0
 
     def __init__(self, *args, **kwargs):
         super(PowerGrid, self).__init__(*args, **kwargs)

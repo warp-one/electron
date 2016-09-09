@@ -166,7 +166,7 @@ class Grid(object):
         
         unit.x = x
         unit.y = y
-        unit.rotate(dx, dy)
+#        unit.rotate(dx, dy)
         
         if old_cellX == cellX and old_cellY == cellY:
             return

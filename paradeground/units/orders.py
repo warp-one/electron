@@ -94,7 +94,10 @@ class UnitController(object):
             units_to_order = self.get_selected_units()
             if units_to_order:
                 origin = tools.get_average_location(units_to_order)
-                self.give_move_command(self.get_selected_units(), origin, (x, y))
+                if modifiers & key.MOD_SHIFT:
+                    self.give_move_command(self.get_selected_units(), origin, (x, y), shift=True)
+                else:
+                    self.give_move_command(self.get_selected_units(), origin, (x, y))
             
     # an inefficiency here...        
     def get_selected_units(self):
@@ -196,7 +199,8 @@ class UnitController(object):
                     self.to_select.append(u)
         self.run_selection()
             
-    def give_move_command(self, unit_list, origin, destination):
+    def give_move_command(self, unit_list, origin, destination, shift=False):
+        order_angle = 0
         exes = [unit.x for unit in unit_list]
         whys = [unit.y for unit in unit_list]
         min_x = min(exes)
@@ -204,10 +208,12 @@ class UnitController(object):
         min_y = min(whys)
         max_y = max(whys)
         a, b = destination
-        if a >= min_x and a <= max_x and b >= min_y and b <= max_y:
+        # narrow angles should still be forced move
+        if len(unit_list) > 1:
+            v1, v2 = tools.closest_two_square_vertices(destination, min_x, max_x, min_y, max_y)
+            order_angle = tools.angle_from_three_points(destination, v1, v2)
+        if not shift and order_angle > 45:
             orders = "GATHER"
-            for u in unit_list:
-                u.receive_command(destination, command="GATHER", origin=origin)
         else:
             orders = "MOVE"
         for u in unit_list:

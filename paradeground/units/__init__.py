@@ -30,8 +30,8 @@ class Speed(Status):
 
     def __init__(self, unit, max_speed=600, acceleration=20):
         super(Speed, self).__init__(unit)
-        self.max_speed = max_speed
-        self.acceleration = acceleration
+        self.deceleration = acceleration
+        self.max_speed = 600
         self.zones = set()
         
     def trigger(self, zone):
@@ -42,17 +42,22 @@ class Speed(Status):
         #self.zones.discard(zone)
         
     def update(self, dt):
-        speed_normal = (self.unit.current_speed - self.unit.BASE_SPEED)/(self.max_speed - self.unit.BASE_SPEED)
+        active = False
         if self.zones:
-            if self.unit.current_speed < self.max_speed:
-                self.unit.current_speed += min(self.acceleration, self.max_speed - self.unit.current_speed)
-            #if not randint(0, 270):
-            #    self.unit.flat_poly.colors = [255 for x in self.unit.flat_poly.colors]
+            max_speed = min([max([z.top_speed for z in self.zones]), self.unit.MAX_SPEED])
+            acceleration = max([z.acceleration for z in self.zones])
+            active = True
+        else:
+            max_speed = self.max_speed
+        speed_normal = (self.unit.current_speed - self.unit.BASE_SPEED)/(max_speed - self.unit.BASE_SPEED)
+        if active:
+            if self.unit.current_speed < max_speed:
+                self.unit.current_speed += min(acceleration, max_speed - self.unit.current_speed)
             self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else self.unit.color[i%3] for i, x in enumerate(self.unit.flat_poly.colors)]
 
         else:
             if self.unit.current_speed > self.unit.BASE_SPEED:
-                self.unit.current_speed -= min(self.acceleration/4, self.unit.current_speed - self.unit.BASE_SPEED)
+                self.unit.current_speed -= min(self.deceleration/4, self.unit.current_speed - self.unit.BASE_SPEED)
                 self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else int(self.unit.color[i%3]*.83) for i, x in enumerate(self.unit.flat_poly.colors)]
             else:
                 self.unit.flat_poly.colors = [int(self.unit.color[i%3]*.69) for i, x in enumerate(self.unit.flat_poly.colors)]
@@ -68,6 +73,7 @@ class BasicUnit(pyglet.sprite.Sprite):
     w = size
     h = size
     BASE_SPEED = 300.0 # pixels per frame
+    MAX_SPEED = 600.0
     solid = True
     shape = "circle"
     image_factor = 1
@@ -133,6 +139,9 @@ class BasicUnit(pyglet.sprite.Sprite):
         self.delete()
         
     def update(self, dt):
+        self.rotation -= .01
+        while self.rotation < 0:
+            self.rotation += 360
         for s in self.statuses:
             self.statuses[s].update(dt)
         self.velocity = self.current_speed * dt
@@ -174,8 +183,8 @@ class ActiveUnit(BasicUnit):
     def rotate(self, dx, dy):
         position = self.old_x, self.old_y
         mark = self.x + dx, self.y + dy
-        heading = get_angle_in_radians(position, mark)
-        self.rotation = heading
+#        heading = get_angle_in_radians(position, mark)
+#        self.rotation = heading
             
     def arrive(self):
         self.current_destination = (0, 0)

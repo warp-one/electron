@@ -1,4 +1,4 @@
-from math import sqrt, acos, sin, cos
+from math import sqrt, acos, sin, cos, degrees
 from random import randint
 
 def apply_point_rotation_matrix(d_theta, point, origin):
@@ -45,6 +45,29 @@ def get_equilateral_vertices(origin, radius):
     bottom_right = [x + a*sqrt(3), y - a]
     top_center = [x, y + radius]
     return bottom_left + bottom_right + top_center
+    
+def closest_two_square_vertices(vert, minX, maxX, minY, maxY):
+    bl = (minX, minY)
+    br = (maxX, minY)
+    tl = (minX, maxY)
+    tr = (maxX, maxY)
+    top_left = get_distance((minX, maxY), vert)
+    top_right = get_distance((maxX, maxY), vert)
+    bot_left = get_distance((minX, minY), vert)
+    bot_right = get_distance((maxX, minY), vert)
+    distances = {top_left:tl, top_right:tr, bot_left:bl, bot_right:br}
+    sort_distance = distances.keys()
+    sort_distance.sort()
+    
+    return distances[sort_distance[0]], distances[sort_distance[1]]
+    
+    
+    
+def angle_from_three_points(p1, p2, p3):
+    p12 = get_distance(p1, p2)
+    p13 = get_distance(p1, p3)
+    p23 = get_distance(p2, p3)
+    return degrees(acos((p12**2 + p13**2 - p23**2)/(2*p12*p13)))
     
 def get_rand_RGBs(lower=0, upper=255):
     return (randint(lower, upper), randint(lower, upper), randint(lower, upper))

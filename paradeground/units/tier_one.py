@@ -15,6 +15,7 @@ class Sparkle(ThinkingUnit, Circle):
     image_factor = 1.4
     selection_scale = 1.3 * image_factor
     BASE_SPEED = 150.
+    MAX_SPEED = 700.
 
     def __init__(self, *args, **kwargs):
         super(Sparkle, self).__init__(*args, **kwargs)
