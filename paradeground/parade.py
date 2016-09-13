@@ -51,7 +51,7 @@ class ParadeGround(object):
                                                  )
         self.unit_controller.load_units([tier_one.Sparkle] * 5, team="CPU")
         grids = self.unit_controller.load_units([power_grid.PowerGrid]*3)
-        walls = self.unit_controller.load_units([tier_one.Wall]*1)
+        walls = self.unit_controller.load_units([tier_one.Pyramid]*1)
         for wall in walls:
             self.unit_controller.collision_manager.grid.move(wall, 200, 200)
         grids[0].x, grids[0].y = 750, 800

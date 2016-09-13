@@ -83,32 +83,38 @@ class Wall(ThinkingUnit, Rectangle):
         self.flat_poly.vertices = vertices
         
 class Pyramid(Wall):
+
+    w, h = 100, 100
+
     def __init__(self, *args, **kwargs):
+        side_normal = (self.w + self.h)/2
+        self.z = randint(side_normal, side_normal*2)
         super(Pyramid, self).__init__(*args, **kwargs)
         
-        side_normal = (self.w + self.h)/2
-        self.z = randint(side_normal/3., side_normal*4/3.)
         
     def init_graphics(self):
-        x, y = self.x, self.y
-        corners = [self.left, self.top, 0, self.right, self.top, 0,
+        vertices = [self.left, self.top, 0, self.right, self.top, 0,
                     self.right, self.top, 0, self.right, self.bottom, 0,
                     self.right, self.bottom, 0, self.left, self.bottom, 0,
                     self.left, self.bottom, 0, self.left, self.top, 0]
         vertices.extend([self.x, self.y, self.z, self.left, self.top, 0,
                          self.x, self.y, self.z, self.right, self.top, 0,
                          self.x, self.y, self.z, self.right, self.bottom, 0,
-                         self.x, self.y, self.z, self.left, self.bottom, 0
-        self.flat_poly = self.batch.add(8, pyglet.gl.GL_LINES, settings.FOREGROUND,
+                         self.x, self.y, self.z, self.left, self.bottom, 0])
+        self.flat_poly = self.batch.add(16, pyglet.gl.GL_LINES, settings.FOREGROUND,
                                         ('v3f/stream', vertices),
-                                        ('c3B', tuple([100]*(3*len(vertices)/2))
+                                        ('c3B', tuple([randint(50, 255)]*len(vertices))
                                         ))
         self.graphics.append(self.flat_poly)
         
     def update(self, dt):
-        vertices = [self.left, self.top, self.right, self.top,
-                    self.right, self.top, self.right, self.bottom,
-                    self.right, self.bottom, self.left, self.bottom,
-                    self.left, self.bottom, self.left, self.top]
+        vertices = [self.left, self.top, 0, self.right, self.top, 0,
+                    self.right, self.top, 0, self.right, self.bottom, 0,
+                    self.right, self.bottom, 0, self.left, self.bottom, 0,
+                    self.left, self.bottom, 0, self.left, self.top, 0]
+        vertices.extend([self.x, self.y, self.z, self.left, self.top, 0,
+                         self.x, self.y, self.z, self.right, self.top, 0,
+                         self.x, self.y, self.z, self.right, self.bottom, 0,
+                         self.x, self.y, self.z, self.left, self.bottom, 0])
         self.flat_poly.vertices = vertices
     
