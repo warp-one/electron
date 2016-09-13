@@ -117,4 +117,5 @@ class Pyramid(Wall):
                          self.x, self.y, self.z, self.right, self.bottom, 0,
                          self.x, self.y, self.z, self.left, self.bottom, 0])
         self.flat_poly.vertices = vertices
+        self.flat_poly.colors = [randint(0, 255) for _ in range(len(vertices))]
     
