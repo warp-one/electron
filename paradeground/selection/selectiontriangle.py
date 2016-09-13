@@ -18,7 +18,7 @@ class SelectionTriangle(object):
         equilateral_vertices = tools.get_equilateral_vertices(unit_origin, unit_radius)
         self.graphic = batch.add_indexed(3, pyglet.gl.GL_LINES, settings.MIDGROUND, [0, 1, 1, 2, 2, 0],
                         ('v2f', equilateral_vertices),
-                        ('c3B', (0, 255, 0, 0, 255, 0, 0, 255, 0))
+                        ('c3B', tuple([99]*9))
                         )
 
     def update(self, dt):

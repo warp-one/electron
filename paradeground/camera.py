@@ -159,7 +159,7 @@ class GameCamera(object):
 
 class CameraWindow(pyglet.window.Window):
     def __init__(self):
-        super(CameraWindow, self).__init__(resizable=True, 
+        super(CameraWindow, self).__init__(fullscreen=False, resizable=True, 
                                            width=settings.WINDOW_WIDTH,
                                            height=settings.WINDOW_HEIGHT)
         opengl_init()

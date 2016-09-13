@@ -28,11 +28,12 @@ class Speed(Status):
 
     name = "Speed"
 
-    def __init__(self, unit, max_speed=600, acceleration=20):
+    def __init__(self, unit, max_speed=600, acceleration=20, speed_bonus=30):
         super(Speed, self).__init__(unit)
         self.deceleration = acceleration
         self.max_speed = 600
         self.zones = set()
+        self.speed_bonus = speed_bonus
         
     def trigger(self, zone):
         self.zones.add(zone)
@@ -57,8 +58,12 @@ class Speed(Status):
 
         else:
             if self.unit.current_speed > self.unit.BASE_SPEED:
-                self.unit.current_speed -= min(self.deceleration/4, self.unit.current_speed - self.unit.BASE_SPEED)
-                self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else int(self.unit.color[i%3]*.83) for i, x in enumerate(self.unit.flat_poly.colors)]
+                inactive_cap = max_speed - self.speed_bonus
+                if self.unit.current_speed > inactive_cap:
+                    self.unit.current_speed = inactive_cap
+                else:
+                    self.unit.current_speed -= min(self.deceleration/16, self.unit.current_speed - self.unit.BASE_SPEED)
+                self.unit.flat_poly.colors = [self.unit.color[i%3] + int((255 - x)*speed_normal) if not randint(0, 5) else int(self.unit.color[i%3]) for i, x in enumerate(self.unit.flat_poly.colors)]
             else:
                 self.unit.flat_poly.colors = [int(self.unit.color[i%3]*.69) for i, x in enumerate(self.unit.flat_poly.colors)]
         self.zones.clear()
@@ -75,9 +80,9 @@ class BasicUnit(pyglet.sprite.Sprite):
     BASE_SPEED = 300.0 # pixels per frame
     MAX_SPEED = 600.0
     solid = True
-    shape = "circle"
     image_factor = 1
     selection_scale = 2 * image_factor
+    immobile = False
 
     def __init__(self, controller, grid, team=None, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
@@ -146,13 +151,9 @@ class BasicUnit(pyglet.sprite.Sprite):
             self.statuses[s].update(dt)
         self.velocity = self.current_speed * dt
     
-        if self.selection_indicator:
-            self.selection_indicator.update(dt)
             
-        x, y = self.x, self.y
-        self.flat_poly.vertices = rotate_triangle((0, 0), self.radius*self.image_factor, self.rotation, (x, y))
         
-        self.tick_selection_rotation()
+        self.tick_graphics(dt)
         
     def get_location(self):
         return self.x, self.y
@@ -162,6 +163,12 @@ class BasicUnit(pyglet.sprite.Sprite):
 
     def init_graphics(self):
         pass
+        
+    def tick_graphics(self, dt):
+        if self.selection_indicator:
+            self.selection_indicator.update(dt)
+        self.tick_selection_rotation()
+        
         
     def handle_collision(self, collider):
         return self.solid
@@ -195,12 +202,17 @@ class ActiveUnit(BasicUnit):
     def stop(self):
         self.dx, self.dy = 0, 0
         
+        
     def receive_command(self, target, command=None, origin=(0, 0)):
         if command == "MOVE":
             x = target[0] + self.x - origin[0]
             y = target[1] + self.y - origin[1]
             self.current_destination = (x, y)
             self.brain.set_state("movecommand")
+        elif command == "STOP":
+            self.current_destination = self.x, self.y
+            self.stop()
+            self.brain.set_state("idleing")
         else:
             self.current_destination = target
             self.brain.set_state("movecommand")

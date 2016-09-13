@@ -9,6 +9,26 @@ from collision import CollisionManager
 
 number_keys = [key._1, key._2, key._3, key._4, key.Q, key.W, key.E, key.R]
 
+class WindowController(object):
+    def __init__(self, window):
+        self.window = window
+        self.window_sizes = [(800, 600), (1024, 768), (1680, 1050)]
+        self.current_size = len(self.window_sizes) - 1
+        self.keys = key.KeyStateHandler()
+        
+        
+    def on_key_press(self, symbol, modifiers):
+        if symbol == key.M:
+            self.current_size += 1
+            if self.current_size >= len(self.window_sizes):
+                self.current_size = 0
+            self.window.set_size(*self.window_sizes[self.current_size])
+        if symbol == key.F:
+            if self.window.fullscreen:
+                self.window.set_fullscreen(False)
+            else:
+                self.window.set_fullscreen(True)
+            
 class UnitController(object):
     def __init__(self, window):
         self.batch = pyglet.graphics.Batch()
@@ -132,7 +152,8 @@ class UnitController(object):
                          group=settings.FOREGROUND)
             self.add_entity(new_unit)
             # the line below is only doing the team units?
-            self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
+            if new_unit.shape == "circle":
+                self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
             new_unit.current_destination = new_unit.get_location()
             loaded_units.append(new_unit)
         return loaded_units
@@ -212,7 +233,10 @@ class UnitController(object):
         if len(unit_list) > 1:
             v1, v2 = tools.closest_two_square_vertices(destination, min_x, max_x, min_y, max_y)
             order_angle = tools.angle_from_three_points(destination, v1, v2)
-        if not shift and order_angle > 45:
+        internal_move = ((a > min_x and a < max_x) and (b > min_y and b < max_y))
+        if shift:
+            orders = "MOVE"
+        elif internal_move or order_angle > 35:
             orders = "GATHER"
         else:
             orders = "MOVE"

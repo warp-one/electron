@@ -5,7 +5,7 @@ import pyglet
 
 from __init__ import ThinkingUnit, Speed, BasicUnit
 from shape import Circle, Rectangle
-from tools import transform_vertex_list, get_equilateral_vertices, get_rand_RGBs
+from tools import transform_vertex_list, get_equilateral_vertices, get_rand_RGBs, rotate_triangle
 import settings
 
 class Sparkle(ThinkingUnit, Circle):
@@ -15,7 +15,7 @@ class Sparkle(ThinkingUnit, Circle):
     image_factor = 1.4
     selection_scale = 1.3 * image_factor
     BASE_SPEED = 150.
-    MAX_SPEED = 700.
+    MAX_SPEED = 500.
 
     def __init__(self, *args, **kwargs):
         super(Sparkle, self).__init__(*args, **kwargs)
@@ -42,14 +42,24 @@ class Sparkle(ThinkingUnit, Circle):
         self.flat_poly.colors = self.color*3
         self.graphics.append(self.flat_poly)
         
+    def tick_graphics(self, dt):
+        super(Sparkle, self).tick_graphics(dt)
+        x, y = self.x, self.y
+        self.flat_poly.vertices = rotate_triangle((0, 0), self.radius*self.image_factor, self.rotation, (x, y))
+        
+        
     def update(self, dt):
         super(Sparkle, self).update(dt)
+        
+
         #self.flat_poly.colors = list(get_rand_RGBs(lower=40)) + list(get_rand_RGBs(lower=180)) + list(get_rand_RGBs(lower=222))
 
 class Wall(ThinkingUnit, Rectangle):
+
+    immobile = True
+
     def __init__(self, *args, **kwargs):
         super(Wall, self).__init__(*args, **kwargs)
-        self.x, self.y = 200, 200
         self.init_graphics()
         
     def init_graphics(self):
@@ -66,8 +76,39 @@ class Wall(ThinkingUnit, Rectangle):
         self.graphics.append(self.flat_poly)
         
     def update(self, dt):
-        self.velocity = self.current_speed * dt
-        for i, p in enumerate(self.flat_poly.vertices):
-            if self.x != self.old_x or self.y != self.old_y:
-                self.old_x, self.old_y = self.x, self.y
-
+        vertices = [self.left, self.top, self.right, self.top,
+                    self.right, self.top, self.right, self.bottom,
+                    self.right, self.bottom, self.left, self.bottom,
+                    self.left, self.bottom, self.left, self.top]
+        self.flat_poly.vertices = vertices
+        
+class Pyramid(Wall):
+    def __init__(self, *args, **kwargs):
+        super(Pyramid, self).__init__(*args, **kwargs)
+        
+        side_normal = (self.w + self.h)/2
+        self.z = randint(side_normal/3., side_normal*4/3.)
+        
+    def init_graphics(self):
+        x, y = self.x, self.y
+        corners = [self.left, self.top, 0, self.right, self.top, 0,
+                    self.right, self.top, 0, self.right, self.bottom, 0,
+                    self.right, self.bottom, 0, self.left, self.bottom, 0,
+                    self.left, self.bottom, 0, self.left, self.top, 0]
+        vertices.extend([self.x, self.y, self.z, self.left, self.top, 0,
+                         self.x, self.y, self.z, self.right, self.top, 0,
+                         self.x, self.y, self.z, self.right, self.bottom, 0,
+                         self.x, self.y, self.z, self.left, self.bottom, 0
+        self.flat_poly = self.batch.add(8, pyglet.gl.GL_LINES, settings.FOREGROUND,
+                                        ('v3f/stream', vertices),
+                                        ('c3B', tuple([100]*(3*len(vertices)/2))
+                                        ))
+        self.graphics.append(self.flat_poly)
+        
+    def update(self, dt):
+        vertices = [self.left, self.top, self.right, self.top,
+                    self.right, self.top, self.right, self.bottom,
+                    self.right, self.bottom, self.left, self.bottom,
+                    self.left, self.bottom, self.left, self.top]
+        self.flat_poly.vertices = vertices
+    

@@ -13,8 +13,8 @@ def collides(unit, other):
         else:
             return False
     if unit.shape == "rectangle" and other.shape == "circle":
-        if other.x > unit.left and other.x < unit.right:
-            if other.y > unit.bottom and other.y < unit.top:
+        if other.x + other.radius > unit.left and other.x - other.radius < unit.right:
+            if other.y + other.radius > unit.bottom and other.y - other.radius < unit.top:
                 return True
         else:
             return False
@@ -131,14 +131,22 @@ class Grid(object):
                         if proximity < unit.radius + other.radius:
                             dx, dy = tools.one_step_toward_destination((other.x, other.y), 
                                              (unit.x, unit.y), 
-                                             (40./6))
+                                             (10.)) # this value should be how far
+                                                      # unit overlaps into other
                                              
-                                             
-                            self.move(unit, -dx, -dy)
-                            self.move(other, dx, dy)
-                            unit.brain.set_state("waiting")
-                            other.brain.set_state("waiting")
-                            adjusts.update([unit, other])
+                            if not unit.immobile:
+                                self.move(unit, -dx, -dy)
+                                if other.immobile:
+                                    unit.receive_command(None, command="STOP")
+                                else:
+                                    unit.brain.set_state("waiting")
+                            if not other.immobile:
+                                self.move(other, dx, dy)
+                                if unit.immobile:
+                                    other.receive_command(None, command="STOP")
+                                else:
+                                    other.brain.set_state("waiting")
+                            adjusts.update([unit])#, other])
 
             else:
                 pass

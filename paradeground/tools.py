@@ -1,4 +1,4 @@
-from math import sqrt, acos, sin, cos, degrees
+from math import sqrt, acos, sin, cos, tan, degrees
 from random import randint
 
 def apply_point_rotation_matrix(d_theta, point, origin):
@@ -26,6 +26,19 @@ def get_average_location(unit_list):
         a += u.x
         b += u.y
     return a/len(unit_list), b/len(unit_list)
+    
+def circle_rectangle_overlap(circle_origin, circle_radius, 
+                             square_origin, square_w, square_h):
+    distance = get_distance(circle_origin, square_origin)
+    x_diff = square_origin[0] - circle_origin[0]
+    angle_offset = acos(x_diff/distance)
+    sh = (square_w/2)*tan(angle_offset)
+    square_coord = square_origin[0] - square_w/2, square_origin[1] + sh
+    cy = sin(angle_offset) * circle_radius
+    cx = cos(angle_offset) * circle_radius
+    circle_coord = circle_origin[0] + cx , circle_origin[1] + cy
+    h = square_w/2/cos(angle_offset)
+    return angle_offset, get_distance(square_coord, circle_coord)
    
 def get_distance(a, b):
     return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
@@ -34,6 +47,7 @@ def get_distance_bt_units(unit, other):
     a = unit.x, unit.y
     b = other.x, other.y
     return get_distance(a, b)
+    
 def get_dot_product(V1, V2):
     return V1[0]*V2[0] + V1[1]*V2[1]
     

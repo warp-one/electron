@@ -79,14 +79,14 @@ class PowerGrid(ThinkingUnit, Rectangle):
         self.init_graphics(strand_frequency)
         
     def update(self, dt):
-        if not self.points:
-            pts = self.get_grid_points(2000)
-            lenpts = len(pts)
-        
-            self.points = self.batch.add(lenpts, pyglet.gl.GL_POINTS, settings.FOREGROUND,
-                                        ('v2f/stream', tuple(chain(*pts))),
-                                        ('c3B', tuple([255]*3*lenpts))
-                                        )
+#        if not self.points:
+#            pts = self.get_grid_points(2000)
+#            lenpts = len(pts)
+#        
+#            self.points = self.batch.add(lenpts, pyglet.gl.GL_POINTS, settings.FOREGROUND,
+#                                        ('v2f/stream', tuple(chain(*pts))),
+#                                        ('c3B', tuple([255]*3*lenpts))
+#                                        )
 
         
         for s in self.statuses:

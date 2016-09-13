@@ -51,9 +51,9 @@ class ParadeGround(object):
                                                  )
         self.unit_controller.load_units([tier_one.Sparkle] * 5, team="CPU")
         grids = self.unit_controller.load_units([power_grid.PowerGrid]*3)
-#        walls = self.unit_controller.load_units([tier_one.Wall]*3)
-#        for wall in walls:
-#            wall.move(randint(-25, 25), randint(-25, 25))
+        walls = self.unit_controller.load_units([tier_one.Wall]*1)
+        for wall in walls:
+            self.unit_controller.collision_manager.grid.move(wall, 200, 200)
         grids[0].x, grids[0].y = 750, 800
         grids[0].change_size(1200, 300, strand_frequency=20)
         grids[1].x, grids[1].y = 750, 600
@@ -62,6 +62,11 @@ class ParadeGround(object):
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)
         self.window.push_handlers(self.unit_controller.keys)
+        
+        self.window_controller = orders.WindowController(self.window)
+        self.window.push_handlers(self.window_controller)
+        self.window.push_handlers(self.window_controller.keys)
+        
         pyglet.clock.schedule_interval(self.unit_controller.update, settings.FRAMERATE)
         
         # TODO: A level/map class for each stage
