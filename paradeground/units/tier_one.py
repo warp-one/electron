@@ -54,13 +54,16 @@ class Sparkle(ThinkingUnit, Circle):
 
         #self.flat_poly.colors = list(get_rand_RGBs(lower=40)) + list(get_rand_RGBs(lower=180)) + list(get_rand_RGBs(lower=222))
 
+class Graphic(object):
+    pass
+        
 class Wall(ThinkingUnit, Rectangle):
 
     immobile = True
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, w, h, *args, **kwargs):
+        self.w, self.h = w, h
         super(Wall, self).__init__(*args, **kwargs)
-        self.init_graphics()
         
     def init_graphics(self):
         x, y = self.x, self.y
@@ -84,12 +87,12 @@ class Wall(ThinkingUnit, Rectangle):
         
 class Pyramid(Wall):
 
-    w, h = 100, 100
 
     def __init__(self, *args, **kwargs):
-        side_normal = (self.w + self.h)/2
-        self.z = randint(side_normal, side_normal*2)
         super(Pyramid, self).__init__(*args, **kwargs)
+        side_normal = (self.w + self.h)/2
+        self.z = randint(side_normal/2, side_normal)
+        self.init_graphics()
         
         
     def init_graphics(self):

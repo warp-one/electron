@@ -42,22 +42,48 @@ class ParadeGround(object):
         
         # make units
         self.unit_controller = orders.UnitController(self.window)
-        self.unit_controller.load_units([tier_one.Sparkle] * 40,
-                                         team="Player",
-                                         params={'team':"PLAYER", 
-                                                 'x':randint(0, settings.MAP_WIDTH), 
-                                                 'y':randint(0, settings.MAP_HEIGHT)
-                                                 }
-                                                 )
-        self.unit_controller.load_units([tier_one.Sparkle] * 5, team="CPU")
-        grids = self.unit_controller.load_units([power_grid.PowerGrid]*3)
-        walls = self.unit_controller.load_units([tier_one.Pyramid]*1)
-        for wall in walls:
-            self.unit_controller.collision_manager.grid.move(wall, 200, 200)
-        grids[0].x, grids[0].y = 750, 800
-        grids[0].change_size(1200, 300, strand_frequency=20)
-        grids[1].x, grids[1].y = 750, 600
-        grids[1].change_size(250, 700)
+        sparkles = [tier_one.Sparkle( 
+                         team="Player",
+                         img=mote,
+                         x=randint(100, 1000), 
+                         y=randint(100, 1000), 
+                         batch=self.unit_controller.batch, 
+                         group=settings.FOREGROUND) for _ in range(40)]
+        evil_sparkles = [tier_one.Sparkle( 
+                         team="CPU",
+                         img=mote, 
+                         x=randint(100, 1000), 
+                         y=randint(100, 1000), 
+                         batch=self.unit_controller.batch, 
+                         group=settings.FOREGROUND) for _ in range(5)]
+                         
+
+        self.unit_controller.load_units(sparkles)
+        self.unit_controller.load_units(evil_sparkles)
+        new_grids = [power_grid.PowerGrid(
+                         team=None,
+                         img=mote, 
+                         x=p, 
+                         y=p, 
+                         batch=self.unit_controller.batch, 
+                         group=settings.FOREGROUND) for p in range(500, 2000, 500)]                         
+        self.unit_controller.load_units(new_grids)
+        walls = [tier_one.Pyramid(a, b,
+                         team=None,
+                         img=mote, 
+                         x=c, 
+                         y=d, 
+                         batch=self.unit_controller.batch, 
+                         group=settings.FOREGROUND) 
+                     for a, b, c, d in [(400, 400, 1000, 500),
+                                        (300, 500, 1200, 1600)]]                         
+        
+        self.unit_controller.load_units(walls)
+#        for wall in walls:
+#            self.unit_controller.collision_manager.grid.move(wall, 200, 200)
+#        grids[0].x, grids[0].y = 750, 800
+#        grids[0].change_size(1200, 300, strand_frequency=20)
+        new_grids[1].change_size(1200, 250)
         self.unit_controller.collision_manager.grid.collision = True
         self.unit_controller.add_observer(self.window.cam)
         self.window.push_handlers(self.unit_controller)

@@ -10,8 +10,8 @@ class UnitStateIdleing(State):
         pass
         
     def check_conditions(self):
-        hostile_unit = self.unit.controller.get_close_entity(self.unit.get_location())
-        ranging_distance = tools.get_distance(self.unit.leash_point, self.unit.get_location())
+#        hostile_unit = self.unit.controller.get_close_entity(self.unit.get_location())
+#        ranging_distance = tools.get_distance(self.unit.leash_point, self.unit.get_location())
 #        if hostile_unit:
 #            if hostile_unit.team != self.unit.team:
 #                self.unit.target = hostile_unit
@@ -42,11 +42,11 @@ class UnitStateChasing(State):
             print "too far!"
             self.unit.current_destination = self.unit.leash_point
             return "movecommand"
-        hostile_unit = self.unit.controller.get_close_entity(self.unit.get_location())
-        if not hostile_unit:
-            self.unit.target = None
-            print "target lost"
-            return "idleing"
+#        hostile_unit = self.unit.controller.get_close_entity(self.unit.get_location())
+#        if not hostile_unit:
+#            self.unit.target = None
+#            print "target lost"
+#            return "idleing"
                 
         return None
         

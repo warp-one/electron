@@ -84,20 +84,15 @@ class BasicUnit(pyglet.sprite.Sprite):
     selection_scale = 2 * image_factor
     immobile = False
 
-    def __init__(self, controller, grid, team=None, *args, **kwargs):
+    def __init__(self, team=None, *args, **kwargs):
         super(BasicUnit, self).__init__(*args, **kwargs)
-        
-        self.controller = controller
         self.team = team
         self.name = None
         self.id = 0
         
         # grid
-        self.grid = grid
         self.prev = None
         self.next = None
-        if self.grid:
-            self.grid.add(self)
         
         self.graphics = []
         self.group = settings.FOREGROUND
@@ -137,7 +132,6 @@ class BasicUnit(pyglet.sprite.Sprite):
             return False
         
     def suicide(self):
-        self.grid.remove(self)
         #self.spawn_death_animation()
         for g in self.graphics:
             g.delete()

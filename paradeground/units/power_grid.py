@@ -74,7 +74,7 @@ class PowerGrid(ThinkingUnit, Rectangle):
         
     def change_size(self, w, h, strand_frequency=20):
         self.strands.delete()
-        self.grid.re_grid(self)
+#        self.grid.re_grid(self)
         self.w, self.h = w, h
         self.init_graphics(strand_frequency)
         

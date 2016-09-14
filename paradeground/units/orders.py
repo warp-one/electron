@@ -141,16 +141,11 @@ class UnitController(object):
             else:
                 self.select_in_area()
         
-    def load_units(self, unit_list, team=None, params=None):
+    def load_units(self, unit_list):
         loaded_units = []
-        for u in unit_list:
-            new_unit = u(self, 
-                         self.collision_manager.grid,
-                         team=team,
-                         img=resources.mote, x=0., y=0., 
-                         batch=self.batch, 
-                         group=settings.FOREGROUND)
+        for new_unit in unit_list:
             self.add_entity(new_unit)
+            self.collision_manager.grid.add(new_unit)
             # the line below is only doing the team units?
             if new_unit.shape == "circle":
                 self.collision_manager.grid.move(new_unit, randint(100, 1700), randint(100, 1700))
@@ -162,6 +157,7 @@ class UnitController(object):
     def kill_units(self, unit_list):
         for u in unit_list:
             self.remove_entity(u)
+            self.collision_manager.grid.remove(u)
             u.suicide()
             
     def run_selection(self):
