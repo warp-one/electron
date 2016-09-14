@@ -120,7 +120,7 @@ class ParadeGround(object):
         self.window.cam.apply()
         if settings.ANTI_ALIASING:
             pyglet.gl.glColor4f(1.0, 0, 0, 1.0)
-            glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)                             
+            glBlendFunc (GL_ONE_MINUS_CONSTANT_COLOR, GL_ONE_MINUS_SRC_ALPHA)                             
             glEnable (GL_BLEND)                                                            
             glEnable (GL_MULTISAMPLE);                                                     
 

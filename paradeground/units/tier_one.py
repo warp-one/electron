@@ -46,17 +46,8 @@ class Sparkle(ThinkingUnit, Circle):
         super(Sparkle, self).tick_graphics(dt)
         x, y = self.x, self.y
         self.flat_poly.vertices = rotate_triangle((0, 0), self.radius*self.image_factor, self.rotation, (x, y))
-        
-        
-    def update(self, dt):
-        super(Sparkle, self).update(dt)
-        
 
-        #self.flat_poly.colors = list(get_rand_RGBs(lower=40)) + list(get_rand_RGBs(lower=180)) + list(get_rand_RGBs(lower=222))
-
-class Graphic(object):
-    pass
-        
+         
 class Wall(ThinkingUnit, Rectangle):
 
     immobile = True
