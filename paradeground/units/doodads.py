@@ -20,7 +20,7 @@ class MapBorder(BasicUnit):
         Tside = (bt, 0, bt, bt, mw - bt, 0, mw - bt, bt)
         Bside = (bt, mh - bt, bt,  mh, mw - bt, mh - bt, mw - bt, mh)
         vertices = combine_tuples([Lside, Rside, Tside, Bside])
-        self.border = self.batch.add_indexed(16, pyglet.gl.GL_TRIANGLES, self.group, 
+        self.border = self.batch.add_indexed(16, pyglet.gl.GL_TRIANGLES, settings.BACKGROUND, 
                                              [0, 1, 2, 1, 2, 3, 
                                               4, 5, 6, 5, 6, 7, 
                                               8, 9, 10, 9, 10, 11, 
@@ -29,5 +29,6 @@ class MapBorder(BasicUnit):
                                              ('c3B/static', tuple([50]*48))
                                              )
 
+                                             
 class Obstacle(BasicUnit):
     pass

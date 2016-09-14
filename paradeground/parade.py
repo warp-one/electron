@@ -68,6 +68,7 @@ class ParadeGround(object):
                          batch=self.unit_controller.batch, 
                          group=settings.FOREGROUND) for p in range(500, 2000, 500)]                         
         self.unit_controller.load_units(new_grids)
+        
         walls = [tier_one.Pyramid(a, b,
                          team=None,
                          img=mote, 
@@ -76,8 +77,11 @@ class ParadeGround(object):
                          batch=self.unit_controller.batch, 
                          group=settings.FOREGROUND) 
                      for a, b, c, d in [(400, 400, 1000, 500),
-                                        (300, 500, 1200, 1600)]]                         
-        
+                                        (300, 500, 1200, 1600),
+                                        (100, 100, 1350, 400),
+                                        (100, 100, 1450, 400),
+                                        (130, 130, 1450, 515)]                         
+                ]
         self.unit_controller.load_units(walls)
 #        for wall in walls:
 #            self.unit_controller.collision_manager.grid.move(wall, 200, 200)
@@ -103,14 +107,6 @@ class ParadeGround(object):
                                                    batch=self.batch)
                                                    )
         
-    def add_rect(self):
-        new_rect = self.batch.add(2, pyglet.gl.GL_LINES, None, 
-                        ('v2i', (-10, -10, -10, -10)),
-                        ('c3B', (0, 0, 255, 0, 255, 0))
-                       )
-        self.all_graphics.append(new_rect)
-        return new_rect
-        
     def execute(self):
         pyglet.app.run()
         
@@ -128,8 +124,8 @@ class ParadeGround(object):
             glEnable (GL_POLYGON_SMOOTH);                                                     
             glHint (GL_LINE_SMOOTH_HINT, GL_DONT_CARE)                                     
             glLineWidth (1)                                                                
-        self.unit_controller.batch.draw()
         self.batch.draw()
+        self.unit_controller.batch.draw()
         
 if __name__ == '__main__':
     game = ParadeGround()
