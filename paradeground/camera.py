@@ -1,3 +1,9 @@
+import math
+from math import tan, radians, cos, sin
+
+from numpy import linalg, matrix
+import numpy as np
+
 import pyglet
 from pyglet.gl import *
 from pyglet.window import key, mouse
@@ -17,6 +23,14 @@ def x_array(list):
     """
     return (GLfloat * len(list))(*list)
     
+def gl_matrix_to_numpy(glmatrix):
+    col_major_matrix = list(glmatrix)
+    row_major_matrix = [[], [], [], []]
+    for row in row_major_matrix:
+        while len(row) < 4:
+            row.append(col_major_matrix.pop(0))
+    return row_major_matrix
+    
 class GameCamera(object):
     mode = 1
     x, y, z = 0, 0, 512
@@ -29,6 +43,7 @@ class GameCamera(object):
         self.scrolling = False
         self.x_scroll, self.y_scroll = 0, 0
         self.win = window
+        self.board_y = 0
         
 
     def view(self, width, height):
@@ -83,6 +98,11 @@ class GameCamera(object):
         glLoadIdentity()
         glOrtho(-self.w/2., self.w/2., -self.h/2., self.h/2., 0, self.far)
         glMatrixMode(GL_MODELVIEW)
+        
+    def get_perspective_matrix(self):
+        a = (GLfloat*16)()
+        glGetFloatv(GL_TRANSPOSE_PROJECTION_MATRIX, a)
+        self.perspective_matrix = gl_matrix_to_numpy(a)
 
     def perspective(self):
         """ Perspective projection.
@@ -91,6 +111,7 @@ class GameCamera(object):
         glLoadIdentity()
         gluPerspective(self.fov, float(self.w)/self.h, 0.1, self.far)
         glMatrixMode(GL_MODELVIEW)
+        self.get_perspective_matrix()
 
     def key(self, symbol, modifiers):
         """ Key pressed event handler.
@@ -129,19 +150,24 @@ class GameCamera(object):
                 self.ry += dx/4.
                 self.rx -= dy/4.
             
-    def on_mouse_motion(x, y, dx, dy):
+    def on_mouse_motion(self, x, y, dx, dy):
         pass
         
+    def get_view_matrix(self):
+        a = (GLfloat*16)()
+        glGetFloatv(GL_TRANSPOSE_MODELVIEW_MATRIX, a)
+        self.view_matrix = gl_matrix_to_numpy(a)
 
     def apply(self):
         """ Apply camera transformation.
         """
         glLoadIdentity()
-#        if self.mode == 1: return
         glTranslatef(-self.x, -self.y, -self.z)
         glRotatef(self.rx, 1, 0, 0)
         glRotatef(self.ry, 0, 1, 0)
         glRotatef(self.rz, 0, 0, 1)
+        self.get_view_matrix()
+        
         
     def scroll(self, dt):
         if self.scrolling:
@@ -172,9 +198,11 @@ class CameraWindow(pyglet.window.Window):
         self.push_handlers(self.mouse_selector)
         
         pyglet.clock.schedule_interval(self.cam.scroll, settings.FRAMERATE)
+        self.mouse_x, self.mouse_y = 0, 0
 
     def on_mouse_motion(self, x, y, dx, dy):
         self.pan(x, y)
+        self.mouse_x, self.mouse_y = x, y
             
     def on_mouse_leave(self, x, y):
         self.pan(x, y)

@@ -34,8 +34,6 @@ class UnitController(object):
         self.batch = pyglet.graphics.Batch()
         self.entities = {}
         self.entity_id = 0
-        self.init_xy = (0, 0)
-        self.final_xy = (0, 0)
         self.controlled_window = window
 
         self.to_select = []
@@ -50,6 +48,14 @@ class UnitController(object):
             
         self.collision_manager = CollisionManager(self.entities.values())
                                        
+    @property
+    def init_xy(self):
+        return self.controlled_window.mouse_selector.selector_graphic.init_xy
+        
+    @property
+    def final_xy(self):
+        return self.controlled_window.mouse_selector.selector_graphic.final_xy
+        
     def add_entity(self, entity):
         self.entities[self.entity_id] = entity
         entity.id = self.entity_id
@@ -102,15 +108,16 @@ class UnitController(object):
             self.kill_units(to_delete)
 
         self.last_key_pressed = button
-            
-
+        
     def on_mouse_press(self, x, y, buttons, modifiers):
         x += self.wx
         y += self.wy
-        if buttons & mouse.LEFT:
-            self.init_xy = (x, y)
 
         if buttons & mouse.RIGHT:
+            if self.controlled_window.cam.mode == 3:
+                x -= self.wx
+                y -= self.wy
+                x, y = self.controlled_window.mouse_selector.get_plane_from_xy(x, y)
             units_to_order = self.get_selected_units()
             if units_to_order:
                 origin = tools.get_average_location(units_to_order)
@@ -131,7 +138,6 @@ class UnitController(object):
         x += self.wx
         y += self.wy
         if buttons & mouse.LEFT:
-            self.final_xy = (x, y)
             if self.keys[key.LSHIFT]:
                 for u in self.get_unit_list():
                     if u.is_selected():
