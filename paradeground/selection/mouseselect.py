@@ -58,6 +58,14 @@ class MouseSelector(object):
         ray_wor = dot(inv(model_matrix), ray_eye)
         ray_wor = array((ray_wor[0], ray_wor[1], ray_wor[2], 0))
         ray_wor = normalize(ray_wor)
+        #gluUnProject()
+        #https://www.opengl.org/archives/resources/faq/technical/glu.htm#0070
+        #https://www.opengl.org/archives/resources/faq/technical/selection.htm#sele0010
+        print "NDS, CLIP, EYE, WOR"
+        print ray_nds
+        print ray_clip
+        print ray_eye
+        print ray_wor
         self.pick_ray = ray_wor
         _D = self.pick_ray
         O = array((self.parent.x, self.parent.y, self.parent.z, 1))

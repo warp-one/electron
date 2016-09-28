@@ -110,8 +110,8 @@ class GameCamera(object):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(self.fov, float(self.w)/self.h, 0.1, self.far)
-        glMatrixMode(GL_MODELVIEW)
         self.get_perspective_matrix()
+        glMatrixMode(GL_MODELVIEW)
 
     def key(self, symbol, modifiers):
         """ Key pressed event handler.
@@ -157,6 +157,11 @@ class GameCamera(object):
         a = (GLfloat*16)()
         glGetFloatv(GL_TRANSPOSE_MODELVIEW_MATRIX, a)
         self.view_matrix = gl_matrix_to_numpy(a)
+        
+    def get_viewport(self):
+        a = (GLfloat*4)()
+        glGetFloatv(GL_VIEWPORT, a)
+        self.viewport = gl_matrix_to_numpy(a)
 
     def apply(self):
         """ Apply camera transformation.
@@ -167,7 +172,7 @@ class GameCamera(object):
         glRotatef(self.ry, 0, 1, 0)
         glRotatef(self.rz, 0, 0, 1)
         self.get_view_matrix()
-        
+#        self.get_viewport()
         
     def scroll(self, dt):
         if self.scrolling:

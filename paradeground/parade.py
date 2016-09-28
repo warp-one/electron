@@ -112,8 +112,8 @@ class ParadeGround(object):
         
     def on_draw(self):
         self.window.clear()
-        self.window.mouse_selector.batch.draw()
         self.window.cam.apply()
+        self.window.mouse_selector.batch.draw()
         if settings.ANTI_ALIASING:
             pyglet.gl.glColor4f(1.0, 0, 0, 1.0)
             glBlendFunc (GL_ONE_MINUS_CONSTANT_COLOR, GL_ONE_MINUS_SRC_ALPHA)                             
